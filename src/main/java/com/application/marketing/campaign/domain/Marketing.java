@@ -1,4 +1,4 @@
-package com.application.marketing.domain;
+package com.application.marketing.campaign.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +9,9 @@ import javax.persistence.Table;
 
 import com.javapai.framework.common.domain.TopBaseDomain;
 
+/**
+ * 营销活动<br>
+ */
 @Entity
 @Table(name = "marketing")
 public class Marketing extends TopBaseDomain {
@@ -46,6 +49,11 @@ public class Marketing extends TopBaseDomain {
 	 */
 	@Column(name = "link", length = 255)
 	private String link;
+	/**
+	 * 营销活动关联广告
+	 */
+	@Column(name = "ad_account", length = 32)
+	private String adAccount;
 	/**
 	 * 营销活动状态
 	 */
@@ -108,6 +116,14 @@ public class Marketing extends TopBaseDomain {
 
 	public void setLink(String link) {
 		this.link = link;
+	}
+
+	public String getAdAccount() {
+		return adAccount;
+	}
+
+	public void setAdAccount(String adAccount) {
+		this.adAccount = adAccount;
 	}
 
 	public String getStatus() {

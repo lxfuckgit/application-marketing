@@ -1,21 +1,22 @@
-package com.application.marketing.controller;
+package com.application.marketing.campaign.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.application.marketing.controller.dto.MarketingCreateDTO;
-import com.application.marketing.controller.dto.MarketingListDTO;
-import com.application.marketing.domain.Marketing;
-import com.application.marketing.service.CampaignService;
+import com.application.marketing.campaign.controller.dto.MarketingClueListDTO;
+import com.application.marketing.campaign.controller.dto.MarketingCreateDTO;
+import com.application.marketing.campaign.controller.dto.MarketingDeleteDTO;
+import com.application.marketing.campaign.controller.dto.MarketingListDTO;
+import com.application.marketing.campaign.domain.Marketing;
+import com.application.marketing.campaign.domain.MarketingClue;
+import com.application.marketing.campaign.service.CampaignService;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;
 import com.javapai.framework.action.RstResult;
@@ -28,13 +29,13 @@ public class CampaignController {
 	private CampaignService campaignService;
 
 	/**
-	 * 分页查询
+	 * 查询营销记录（分页）
 	 */
 	@RequestMapping("/pageCampaign")
 	public PageResult<Marketing> pageCampaign(@RequestBody MarketingListDTO dto) {
-//		Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+//		Sort.Direction sortDirection = Sort.Direction.fromString(dto.getSortBy());
 		Pageable pageable = PageRequest.of(dto.getPageIndex()-1, dto.getPageSize());
-//		Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+//		Pageable pageable = PageRequest.of(dto.getPageIndex() - 1, dto.getPageSize(), Sort.by(sortDirection, dto.getSortBy()));
 		Page<Marketing> result = campaignService.findAll(pageable);
 		return ResultBuilder.buildPageResult(1, 12, result.getContent(), result.getTotalElements());
 	}
@@ -45,7 +46,11 @@ public class CampaignController {
 	@RequestMapping("/createCampaign")
 	public RstResult<Long> createCampaign(@RequestBody MarketingCreateDTO dto) {
 		Long id = campaignService.createCampaign(dto);
-		return ResultBuilder.normalResult(id);
+		if (null != id) {
+			return ResultBuilder.normalResult(id);
+		} else {
+			return ResultBuilder.buildResult(ErrorCode.EXCEPTION_CREATE);
+		}
 	}
 	
 	/**
@@ -60,9 +65,9 @@ public class CampaignController {
 	/**
 	 * 根据ID删除
 	 */
-	@DeleteMapping("/{id}")
-	public RstResult<Void> delete(@PathVariable Long campaignId) {
-		boolean r = campaignService.deleteById(campaignId);
+	@RequestMapping("/deleteCampaign")
+	public RstResult<Void> deleteCampaign(@RequestBody MarketingDeleteDTO dto) {
+		boolean r = campaignService.deleteById(dto.getCampaignId());
 		if (r) {
 			return ResultBuilder.normalResult();
 		} else {
@@ -82,6 +87,14 @@ public class CampaignController {
 			return ResultBuilder.normalResult(entity);
 		}
 	}
+	
+	/**
+	 * 查询营销线索（分页）
+	 */
+	@RequestMapping("/pageCampaignClue")
+	public PageResult<MarketingClue> pageCampaignClue(@RequestBody MarketingClueListDTO dto) {
+		return campaignService.pageCampaignClue(dto);
+	}
 
 	/**
 	 * 批量删除
@@ -100,16 +113,6 @@ public class CampaignController {
 //		int result = marketingService.updateStatus(id, status);
 //		return ResponseEntity.ok(result);
 //	}
-
-	/**
-	 * 查询所有
-	 */
-//	@GetMapping
-//	public ResponseEntity<List<Marketing>> findAll() {
-//		List<Marketing> list = marketingService.findAll();
-//		return ResponseEntity.ok(list);
-//	}
-
 
 
 	/**
