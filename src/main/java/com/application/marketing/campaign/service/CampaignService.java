@@ -135,8 +135,20 @@ public class CampaignService extends AbstractBizService {
 	
 	public PageResult<MarketingClue> pageCampaignClue(MarketingClueListDTO dto) {
 		List<Object> params = new ArrayList<Object>();
-		String sql = "select * from marketing_clue where 1=1";
-		return getPage(sql, params, dto.getPageIndex(), dto.getPageSize(), MarketingClue.class);
+		StringBuffer sb = new StringBuffer("select * from marketing_clue where 1=1");
+		if (StringUtils.isNotBlank(dto.getIntUserId())) {
+			sb.append(" and user_id=?");
+			params.add(dto.getIntUserId());
+		}
+		if (StringUtils.isNotBlank(dto.getExtUserId())) {
+			sb.append(" and ext_user_id=?");
+			params.add(dto.getExtUserId());
+		}
+		if (StringUtils.isNotBlank(dto.getExtUserName())) {
+			sb.append(" and ext_user_name=?");
+			params.add(dto.getExtUserName());
+		}
+		return getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(), MarketingClue.class);
 	}
 
 //	public void deleteAll(List<Long> ids) {

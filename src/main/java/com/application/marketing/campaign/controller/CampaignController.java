@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.application.marketing.campaign.controller.dto.MarketingClueListDTO;
 import com.application.marketing.campaign.controller.dto.MarketingCreateDTO;
 import com.application.marketing.campaign.controller.dto.MarketingDeleteDTO;
 import com.application.marketing.campaign.controller.dto.MarketingListDTO;
 import com.application.marketing.campaign.domain.Marketing;
-import com.application.marketing.campaign.domain.MarketingClue;
 import com.application.marketing.campaign.service.CampaignService;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;
@@ -88,14 +86,6 @@ public class CampaignController {
 		}
 	}
 	
-	/**
-	 * 查询营销线索（分页）
-	 */
-	@RequestMapping("/pageCampaignClue")
-	public PageResult<MarketingClue> pageCampaignClue(@RequestBody MarketingClueListDTO dto) {
-		return campaignService.pageCampaignClue(dto);
-	}
-
 	/**
 	 * 批量删除
 	 */
