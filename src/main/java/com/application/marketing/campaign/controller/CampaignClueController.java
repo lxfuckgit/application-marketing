@@ -14,7 +14,7 @@ import com.application.marketing.campaign.domain.MarketingClue;
 import com.application.marketing.campaign.repository.MarketingClueDao;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.service.CampaignService;
-import com.application.marketing.service.QyWeixinService;
+import com.application.marketing.campaign.service.QyWeixinService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;

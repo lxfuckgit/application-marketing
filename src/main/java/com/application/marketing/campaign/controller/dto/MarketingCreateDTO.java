@@ -20,6 +20,10 @@ public class MarketingCreateDTO {
 	 * 活动关联的广告账户
 	 */
 	private String adAccount;
+	/**
+	 * 活动关联的标签信息
+	 */
+	private List<String> tagList;
 
 	public Long getUserId() {
 		return userId;
@@ -59,6 +63,14 @@ public class MarketingCreateDTO {
 
 	public void setAdAccount(String adAccount) {
 		this.adAccount = adAccount;
+	}
+
+	public List<String> getTagList() {
+		return null == tagList ? List.of() : tagList;
+	}
+
+	public void setTagList(List<String> tagList) {
+		this.tagList = tagList;
 	}
 
 }

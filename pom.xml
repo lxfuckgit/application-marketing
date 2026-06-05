@@ -51,6 +51,24 @@
 			<groupId>com.javapai.thirdparty</groupId>
 			<artifactId>javapai-thirdparty-eweixin</artifactId>
 			<version>v20260208</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- 因为官方微信加密的问题：强制使用1.9版本-->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<!-- 因为性能和使用便利性弃用jaxb-api而选用jackson-dataformat-xml框架-->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.dataformat</groupId>
+		    <artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 		
 	</dependencies>

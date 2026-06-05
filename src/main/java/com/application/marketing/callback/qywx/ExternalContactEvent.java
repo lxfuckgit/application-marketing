@@ -13,7 +13,7 @@ import com.application.marketing.campaign.domain.MarketingTag;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.repository.MarketingTagDao;
 import com.application.marketing.campaign.service.MarketingClueService;
-import com.application.marketing.service.QyWeixinService;
+import com.application.marketing.campaign.service.QyWeixinService;
 
 /**
  * 外部联系事件通知

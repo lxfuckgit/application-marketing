@@ -15,13 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.application.marketing.campaign.controller.dto.MarketingClueListDTO;
 import com.application.marketing.campaign.controller.dto.MarketingCreateDTO;
+import com.application.marketing.campaign.controller.dto.MarketingListDTO;
 import com.application.marketing.campaign.domain.Marketing;
 import com.application.marketing.campaign.domain.MarketingClue;
 import com.application.marketing.campaign.domain.MarketingParty;
+import com.application.marketing.campaign.domain.MarketingTag;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.repository.MarketingPartyDao;
+import com.application.marketing.campaign.repository.MarketingTagDao;
 import com.application.marketing.controller.dto.HuokeLinkCreate;
-import com.application.marketing.service.QyWeixinService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.common.service.AbstractBizService;
@@ -37,54 +39,61 @@ public class CampaignService extends AbstractBizService {
 	
 	@Autowired
 	MarketingPartyDao marketingPartyDao;
+
+	@Autowired
+	MarketingTagDao marketingTagDao;
 	
 	@Autowired
 	QyWeixinService qyWeixinService;
 
 	@Transactional
 	public Long createCampaign(MarketingCreateDTO dto) {
+		/* 创建营销活动 */
+		Marketing entity = new Marketing();
+		entity.setName(dto.getName());
+		entity.setType(dto.getType());
+		entity.setAdAccount(dto.getAdAccount());
+		entity.setStatus(StatusEnum.INIT.getValue());
+		entity.setCreateId(String.valueOf(dto.getUserId()));
+		marketingRepository.save(entity);
+		logger.info("--->营销活动创建结果：{}", entity.getId());
+		/* 创建营销活动-关联人员 */
+		dto.getStaffList().forEach(staffId -> {
+			MarketingParty party = new MarketingParty();
+			party.setMarketingId(entity.getId());
+			party.setPartyType(1);
+			party.setPartyId(staffId);
+			marketingPartyDao.save(party);
+		});
+		/* 创建营销活动-关联标签 */
+		dto.getTagList().forEach(tagId -> {
+			MarketingTag mtag = new MarketingTag();
+			mtag.setMarketingId(entity.getId());
+			mtag.setTagType(0);
+			mtag.setTagValue(tagId);
+			marketingTagDao.save(mtag);
+			logger.info("--->营销活动关联标签创建结果：{}", mtag.getId());
+		});
+		
+		/* 特殊的类型处理 */
 		if (Marketing.TYPE_8 == dto.getType()) {
 			HuokeLinkCreate huokeLink = new HuokeLinkCreate();
 			huokeLink.setLinkName(dto.getName());
 			huokeLink.setStaffList(dto.getStaffList());
 			JsonNode json = qyWeixinService.createHuokeLink(huokeLink);
 			if (null == json || null == json.get("link_id")) {
-				logger.warn("--->企业微信createHuokeLink方法异常：");
-				return null;
+				logger.warn("--->[]企业微信createHuokeLink方法异常，中断部分业务。", entity.getId());
+				return entity.getId();
 			}
-			Marketing entity = new Marketing();
-			entity.setName(dto.getName());
-			entity.setType(dto.getType());
 			entity.setExtid(json.get("link_id").asText());
-			entity.setLink(json.get("url").asText());
-			if (StringUtils.isBlank(dto.getAdAccount())) {
-				entity.setLink(json.get("url").asText());
-			} else {
-				entity.setLink(json.get("url").asText() + "?customer_channel=" + dto.getAdAccount());
-			}
-			entity.setAdAccount(dto.getAdAccount());
-			entity.setStatus(StatusEnum.INIT.getValue());
-			entity.setCreateId(String.valueOf(dto.getUserId()));
+//			entity.setLink(json.get("url").asText());
+			entity.setLink(json.get("url").asText() + "?customer_channel=" + json.get("link_id").asText());
+			// 变更状态：ENABLE
+			entity.setStatus(StatusEnum.ENABLE.getValue());
 			marketingRepository.save(entity);
-			logger.info("--->营销活动创建结果：{}", entity.getId());
-			dto.getStaffList().forEach(staffId -> {
-				MarketingParty party = new MarketingParty();
-				party.setMarketingId(entity.getId());
-				party.setPartyType(1);
-				party.setPartyId(staffId);
-				marketingPartyDao.save(party);
-			});
-			return entity.getId();
-		} else {
-			Marketing entity = new Marketing();
-			entity.setName(dto.getName());
-			entity.setType(dto.getType());
-			entity.setAdAccount(dto.getAdAccount());
-			entity.setStatus(StatusEnum.INIT.getValue());
-			entity.setCreateId(String.valueOf(dto.getUserId()));
-			marketingRepository.save(entity);
-			return entity.getId();
+			logger.info("--->营销活动更新结果：{}", entity.getId());
 		}
+		return entity.getId();
 	}
 	
 	public Integer updateCampaign(Marketing marketing) {
@@ -133,6 +142,16 @@ public class CampaignService extends AbstractBizService {
 		return marketingRepository.findAll(pageable);
 	}
 	
+	public PageResult<Marketing> pageCampaign(MarketingListDTO dto) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuffer sb = new StringBuffer("select * from marketing where 1=1");
+		if (StringUtils.isNotBlank(dto.getName())) {
+			sb.append(" and name like ?");
+			params.add("%" + dto.getName() + "%");
+		}
+		return getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(), Marketing.class);
+	}
+	
 	public PageResult<MarketingClue> pageCampaignClue(MarketingClueListDTO dto) {
 		List<Object> params = new ArrayList<Object>();
 		StringBuffer sb = new StringBuffer("select * from marketing_clue where 1=1");
@@ -150,7 +169,18 @@ public class CampaignService extends AbstractBizService {
 		}
 		return getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(), MarketingClue.class);
 	}
-
+	
+	public boolean updateStatusByExtId(String extId, String status) {
+		Marketing entity = marketingRepository.findByExtid(extId);
+		if (null == entity) {
+			logger.warn("--->删除操作异常：非法数据标识！");
+			return false;
+		}
+		entity.setStatus(status);
+		marketingRepository.save(entity);
+		return true;
+	}
+	
 //	public void deleteAll(List<Long> ids) {
 //		marketingRepository.deleteAllById(ids);
 //	}
@@ -175,8 +205,4 @@ public class CampaignService extends AbstractBizService {
 //		return marketingRepository.findByNameContaining(name);
 //	}
 //
-//	public int updateStatus(Long id, String status) {
-//		return marketingRepository.updateStatusById(status, id);
-//	}
-
 }

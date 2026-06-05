@@ -3,17 +3,14 @@ package com.application.marketing.campaign.controller.dto;
 import com.javapai.framework.common.page.BasePageArgs;
 
 public class MarketingListDTO extends BasePageArgs {
-	/**
-	 * 排序方式（按某字段排序）
-	 */
-	private String sortBy;
+	private String name;
 
-	public String getSortBy() {
-		return sortBy;
+	public String getName() {
+		return name;
 	}
 
-	public void setSortBy(String sortBy) {
-		this.sortBy = sortBy;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

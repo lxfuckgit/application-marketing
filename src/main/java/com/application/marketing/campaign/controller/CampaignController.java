@@ -1,9 +1,6 @@
 package com.application.marketing.campaign.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +28,10 @@ public class CampaignController {
 	 */
 	@RequestMapping("/pageCampaign")
 	public PageResult<Marketing> pageCampaign(@RequestBody MarketingListDTO dto) {
-//		Sort.Direction sortDirection = Sort.Direction.fromString(dto.getSortBy());
-		Pageable pageable = PageRequest.of(dto.getPageIndex()-1, dto.getPageSize());
-//		Pageable pageable = PageRequest.of(dto.getPageIndex() - 1, dto.getPageSize(), Sort.by(sortDirection, dto.getSortBy()));
-		Page<Marketing> result = campaignService.findAll(pageable);
-		return ResultBuilder.buildPageResult(1, 12, result.getContent(), result.getTotalElements());
+		return campaignService.pageCampaign(dto);
+//		Pageable pageable = PageRequest.of(dto.getPageIndex()-1, dto.getPageSize());
+//		Page<Marketing> result = campaignService.findAll(pageable);
+//		return ResultBuilder.buildPageResult(1, 12, result.getContent(), result.getTotalElements());
 	}
 
 	/**

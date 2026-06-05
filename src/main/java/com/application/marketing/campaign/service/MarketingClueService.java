@@ -10,7 +10,6 @@ import com.application.marketing.campaign.domain.Marketing;
 import com.application.marketing.campaign.domain.MarketingClue;
 import com.application.marketing.campaign.repository.MarketingClueDao;
 import com.application.marketing.campaign.repository.MarketingDao;
-import com.application.marketing.service.QyWeixinService;
 import com.thirdparty.params.WxCustContact;
 
 @Service
