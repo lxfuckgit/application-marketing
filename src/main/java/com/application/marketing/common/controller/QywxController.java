@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.application.marketing.common.controller.dto.ListQywxDeptDTO;
 import com.application.marketing.common.controller.dto.ListQywxUserDTO;
+import com.application.marketing.common.domain.QywxUser;
+import com.application.marketing.common.repository.QywxUserV2Dao;
 import com.application.marketing.common.service.QywxDeptService;
 import com.application.marketing.common.service.QywxUserService;
+import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;
 import com.javapai.framework.action.RstResult;
 import com.javapai.framework.enums.ErrorCode;
@@ -24,6 +27,9 @@ public class QywxController {
 
 	@Autowired
 	QywxUserService qywxUserService;
+	
+	@Autowired
+	QywxUserV2Dao qywxUserV2Dao;
 
 	/**
 	 * 数据查询（企业微信-通讯录-部门列表）。 <br>
@@ -37,6 +43,21 @@ public class QywxController {
 		}
 		return qywxPartyService.listDepartyment(dto.getAppId());
 	}
+	
+	/**
+	 * 数据查询（企业微信-通讯录-成员列表）。 <br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/pageQywxUser")
+	public PageResult<QywxUser> pageQywxUser(@RequestBody ListQywxUserDTO dto) {
+//		if (StringUtils.isBlank(dto.getAppId())) {
+//			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+//		}
+		return qywxUserV2Dao.listUser(dto);
+	}
+	
 
 	/**
 	 * 数据同步。<br>

@@ -41,13 +41,13 @@ public class QywxDeptService extends QywxService {
 				QywxDept entity = qywxDeptDao.findByExtDeptId(dept.get("id").asText());
 				if (null == entity) {
 					entity = new QywxDept();
+					entity.setExtDeptId(dept.get("id").asText());
 				}
 				entity.setAppId(appId);
 				if (null != info.getParentid()) {
 					entity.setParentId(Long.valueOf(info.getParentid()));
 				}
 				entity.setDeptName(info.getName());
-				entity.setExtDeptId(dept.get("id").asText());
 				qywxDeptDao.save(entity);
 			});
 		} else {
