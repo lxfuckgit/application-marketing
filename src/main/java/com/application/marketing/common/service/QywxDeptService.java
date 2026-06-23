@@ -38,7 +38,7 @@ public class QywxDeptService extends QywxService {
 					logger.warn("--->接口（getDept）通信异常!");
 				}
 				// 同步处理本地数据
-				QywxDept entity = qywxDeptDao.findByExtDeptId(dept.get("id").asText());
+				QywxDept entity = qywxDeptDao.findByAppIdAndExtDeptId(appId, dept.get("id").asText());
 				if (null == entity) {
 					entity = new QywxDept();
 					entity.setExtDeptId(dept.get("id").asText());
