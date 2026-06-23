@@ -25,6 +25,11 @@ public class Marketing extends TopBaseDomain {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	/**
+	 * 应用标识
+	 */
+	@Column(name = "app_id", length = 32, nullable = false)
+	private String appId;
+	/**
 	 * 营销活动分类
 	 */
 	@Column(name = "type", length = 2, nullable = false)
@@ -76,6 +81,14 @@ public class Marketing extends TopBaseDomain {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 
 	public Integer getType() {

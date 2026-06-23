@@ -23,7 +23,7 @@ import com.application.marketing.campaign.domain.MarketingTag;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.repository.MarketingPartyDao;
 import com.application.marketing.campaign.repository.MarketingTagDao;
-import com.application.marketing.controller.dto.HuokeLinkCreate;
+import com.application.marketing.common.service.QywxAcquisitionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.common.service.AbstractBizService;
@@ -45,11 +45,15 @@ public class CampaignService extends AbstractBizService {
 	
 	@Autowired
 	QyWeixinService qyWeixinService;
+	
+	@Autowired
+	QywxAcquisitionService acquisitionService;
 
 	@Transactional
 	public Long createCampaign(MarketingCreateDTO dto) {
 		/* 创建营销活动 */
 		Marketing entity = new Marketing();
+		entity.setAppId(dto.getAppId());
 		entity.setName(dto.getName());
 		entity.setType(dto.getType());
 		entity.setAdAccount(dto.getAdAccount());
@@ -77,10 +81,7 @@ public class CampaignService extends AbstractBizService {
 		
 		/* 特殊的类型处理 */
 		if (Marketing.TYPE_8 == dto.getType()) {
-			HuokeLinkCreate huokeLink = new HuokeLinkCreate();
-			huokeLink.setLinkName(dto.getName());
-			huokeLink.setStaffList(dto.getStaffList());
-			JsonNode json = qyWeixinService.createHuokeLink(huokeLink);
+			JsonNode json = acquisitionService.createHuokeLink(dto.getAppId(), dto.getName(), dto.getStaffList(), false);
 			if (null == json || null == json.get("link_id")) {
 				logger.warn("--->[]企业微信createHuokeLink方法异常，中断部分业务。", entity.getId());
 				return entity.getId();
@@ -119,7 +120,7 @@ public class CampaignService extends AbstractBizService {
 			return false;
 		}
 		if (Marketing.TYPE_8 == optional.get().getType()) {
-			EweixinResult result = qyWeixinService.deleteHuokeLink(optional.get().getExtid());
+			EweixinResult result = acquisitionService.deleteHuokeLink(optional.get().getAppId(), optional.get().getExtid());
 			if (!result.ifSuccess()) {
 				logger.warn("--->删除操作异常：官方操作返回异常！");
 				return false;
@@ -145,6 +146,10 @@ public class CampaignService extends AbstractBizService {
 	public PageResult<Marketing> pageCampaign(MarketingListDTO dto) {
 		List<Object> params = new ArrayList<Object>();
 		StringBuffer sb = new StringBuffer("select * from marketing where 1=1");
+		if (null != dto.getType()) {
+			sb.append(" and type=?");
+			params.add(dto.getType());
+		}
 		if (StringUtils.isNotBlank(dto.getName())) {
 			sb.append(" and name like ?");
 			params.add("%" + dto.getName() + "%");

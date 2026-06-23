@@ -5,6 +5,10 @@ import java.util.List;
 public class MarketingCreateDTO {
 	private Long userId;
 	/**
+	 * 应用标识
+	 */
+	private String appId;
+	/**
 	 * 活动类型
 	 */
 	private Integer type;
@@ -24,6 +28,14 @@ public class MarketingCreateDTO {
 	 * 活动关联的标签信息
 	 */
 	private List<String> tagList;
+	
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
 
 	public Long getUserId() {
 		return userId;

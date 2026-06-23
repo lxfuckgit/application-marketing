@@ -1,5 +1,6 @@
 package com.application.marketing.campaign.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,9 @@ public class CampaignController {
 	 */
 	@RequestMapping("/createCampaign")
 	public RstResult<Long> createCampaign(@RequestBody MarketingCreateDTO dto) {
+		if (StringUtils.isBlank(dto.getAppId())) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		}
 		Long id = campaignService.createCampaign(dto);
 		if (null != id) {
 			return ResultBuilder.normalResult(id);
