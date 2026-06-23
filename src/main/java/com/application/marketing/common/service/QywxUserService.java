@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.application.marketing.common.controller.vo.WxUserInfo;
 import com.application.marketing.common.domain.QywxUser;
 import com.application.marketing.common.repository.QywxUserDao;
-import com.application.marketing.controller.dto.WxUserInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.utils.UtilJson;
 import com.thirdparty.eweixin.UserInfoClient;

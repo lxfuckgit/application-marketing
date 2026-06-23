@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.application.marketing.common.controller.vo.WXTokenVO;
 import com.application.marketing.common.domain.ThirdAccount;
 import com.application.marketing.common.repository.ThirdAccountDao;
-import com.application.marketing.controller.dto.WXTokenVO;
 import com.javapai.framework.utils.UtilJson;
 import com.thirdparty.eweixin.QiyeWeixinClient;
 

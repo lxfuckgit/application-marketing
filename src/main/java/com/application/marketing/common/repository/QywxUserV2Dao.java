@@ -25,7 +25,7 @@ public class QywxUserV2Dao extends AbstractBizService {
 			params.add(dto.getDeptId());
 		}
 		if (StringUtils.isNotBlank(dto.getNickName())) {
-			sb.append(" and nick_name=?");
+			sb.append(" and nick_name like ?");
 			params.add("%" + dto.getNickName() + "%");
 		}
 //		sb.append(" order by create_time desc");
