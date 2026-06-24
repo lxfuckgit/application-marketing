@@ -11,15 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.application.marketing.campaign.repository.MarketingDao;
-import com.application.marketing.controller.dto.HuokeLinkCreate;
-import com.application.marketing.controller.dto.WXTokenVO;
+import com.application.marketing.common.controller.vo.WXTokenVO;
+import com.application.marketing.common.controller.vo.WxUserInfo;
+import com.application.marketing.common.domain.ThirdAccount;
+import com.application.marketing.common.repository.ThirdAccountDao;
 import com.application.marketing.controller.dto.WeixinGroupCreate;
 import com.application.marketing.controller.dto.WeixinGroupMessage;
-import com.application.marketing.controller.dto.WxUserInfo;
 import com.application.marketing.domain.MessageGroup;
-import com.application.marketing.domain.ThirdAccount;
 import com.application.marketing.repository.MessageGroupDao;
-import com.application.marketing.repository.ThirdAccountDao;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.utils.UtilJson;
 import com.thirdparty.eweixin.CorpTagClient;
@@ -29,7 +28,6 @@ import com.thirdparty.eweixin.DeptInfoClient;
 import com.thirdparty.eweixin.GroupChatClient;
 import com.thirdparty.eweixin.QiyeWeixinClient;
 import com.thirdparty.eweixin.UserInfoClient;
-import com.thirdparty.params.EweixinResult;
 import com.thirdparty.params.WxCustContact;
 import com.thirdparty.params.WxDeptInfo;
 
@@ -37,11 +35,6 @@ import com.thirdparty.params.WxDeptInfo;
 public class QyWeixinService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	/**
-	 * 接口成功标记
-	 */
-	private static final Integer RETURN_CODE = 0;
-
 	@Autowired
 	private ThirdAccountDao thirdAccountDao;
 
@@ -77,28 +70,6 @@ public class QyWeixinService {
 //		return ResultBuilder.normalResult(linkList);
 //	}
 //
-	/**
-	 * 创建企业微信的“获客链接”。
-	 * 
-	 * @param dto
-	 * @return
-	 */
-	public JsonNode createHuokeLink(HuokeLinkCreate dto) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = custAcquistionClient.createLink(token, dto.getLinkName(), dto.getStaffList());
-		if (StringUtils.isBlank(result)) {
-			logger.warn("--->接口（list_link）通信异常！");
-			return null;
-		}
-		JsonNode json = UtilJson.json2Object(result);
-		if (RETURN_CODE == json.get("errcode").intValue()) {
-			return json.get("link");
-		} else {
-			logger.warn("--->获取list_link返回错误：{}", json.get("errmsg"));
-			return null;
-		}
-	}
-//
 //	/**
 //	 * 更新企业微信的“获客链接”。
 //	 * 
@@ -110,11 +81,6 @@ public class QyWeixinService {
 //		JsonNode link = qiyeWeixinClient.create_link(token, dto.getLinkName(), dto.getStaffList());
 //		return ResultBuilder.normalResult();
 //	}
-	
-	public EweixinResult deleteHuokeLink(String linkId) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		return custAcquistionClient.deleteLink(token, linkId);
-	}
 	
 //
 //	/**
@@ -139,30 +105,6 @@ public class QyWeixinService {
 ////		});
 //	}
 
-	/**
-	 * 同步企业微信的“获客链接”关联的线索列表。
-	 */
-	public List<JsonNode> syncQiyeWeixinLinkClueList(String linkId) {
-		List<JsonNode> list = new ArrayList<JsonNode>();
-		/* 1、提取线索 */
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = custAcquistionClient.listLinkClue(token, linkId);
-		JsonNode json = UtilJson.json2Object(result);
-		if (0 != json.get("errcode").intValue()) {
-			logger.warn("--->syncQiyeWeixinLinkClueList返回错误：{}", json.get("errmsg"));
-			return null;
-		}
-		/* 2、提取线索 */
-		if (json.get("next_cursor") != null) {
-
-		} else {
-			list.add(json.get("customer_list"));
-			return list;
-		}
-		return null;
-	}
-	
-	
 	public String getUserByMobile(String mobile) {
 		String token = getAccessToken("ww5b77b727717ccd72");
 		String result = userInfoClient.getUserIdByMobile(token, mobile);

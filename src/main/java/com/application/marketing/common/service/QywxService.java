@@ -18,6 +18,11 @@ import com.thirdparty.eweixin.QiyeWeixinClient;
 public class QywxService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	/**
+	 * 企业微信接口成功标记
+	 */
+	public static final Integer RETURN_CODE = 0;
+	
 	@Autowired
 	private ThirdAccountDao thirdAccountDao;
 	

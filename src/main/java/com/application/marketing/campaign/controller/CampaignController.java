@@ -43,6 +43,9 @@ public class CampaignController {
 		if (StringUtils.isBlank(dto.getAppId())) {
 			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
 		}
+		if (null == dto.getType()) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
+		}
 		Long id = campaignService.createCampaign(dto);
 		if (null != id) {
 			return ResultBuilder.normalResult(id);

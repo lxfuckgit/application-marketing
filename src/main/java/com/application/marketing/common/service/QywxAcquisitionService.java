@@ -1,5 +1,6 @@
 package com.application.marketing.common.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,39 @@ public class QywxAcquisitionService extends QywxService {
 	 */
 	public EweixinResult deleteHuokeLink(String appId, String linkId) {
 		return custAcquistionClient.deleteLink(getAccessToken(appId), linkId);
+	}
+	
+	/**
+	 * 同步企业微信的“获客链接”关联的线索列表。
+	 */
+	public List<JsonNode> syncHuokeLinkClueList(String appId, String linkId) {
+		List<JsonNode> list = new ArrayList<JsonNode>();
+		
+		/* 1、换取令牌 */
+		String token = getAccessToken(appId);
+		/* 2、提取线索 */
+		String result = custAcquistionClient.listLinkClue(token, linkId);
+		JsonNode json = UtilJson.json2Object(result);
+		// 不成功则直接退出
+		if (0 != json.get("errcode").intValue()) {
+			logger.warn("--->syncQiyeWeixinLinkClueList返回错误：{}", json.get("errmsg"));
+			return list;
+		}
+		// 成功则直接处理数据
+		int page = 1;
+		while (true) {
+			logger.info("正在获取第{}页数据！", page++);
+			list.add(json.get("customer_list"));
+			// 如果存在下一页就继续遍历
+			if (json.get("next_cursor") != null) {
+				result = custAcquistionClient.listLinkClue(token, linkId, json.get("next_cursor").asText());
+				json = UtilJson.json2Object(result);
+			} else {
+				logger.info("所有数据已获取完毕，共获取{}页客户数据", list.size());
+				break;
+			}
+		}
+		return list;
 	}
 
 }

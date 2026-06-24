@@ -15,6 +15,7 @@ import com.application.marketing.campaign.repository.MarketingClueDao;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.service.CampaignService;
 import com.application.marketing.campaign.service.QyWeixinService;
+import com.application.marketing.common.service.QywxAcquisitionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;
@@ -35,6 +36,9 @@ public class CampaignClueController {
 
 	@Autowired
 	QyWeixinService qyWeixinService;
+	
+	@Autowired
+	QywxAcquisitionService acquisitionService;
 	
 	/**
 	 * 查询营销线索（分页）
@@ -57,15 +61,19 @@ public class CampaignClueController {
 			throw new RuntimeException("营销记录不存在，ID: " + marketingId);
 		}
 
-		List<JsonNode> result = qyWeixinService.syncQiyeWeixinLinkClueList(optional.get().getExtid());
-		result.forEach(action -> {
-			syncCampaingnClueInfo(marketingId, optional.get().getAdAccount(), action);
-		});
+		if (optional.get().getType() == 8) {
+			List<JsonNode> result = acquisitionService.syncHuokeLinkClueList(optional.get().getAppId(), optional.get().getExtid());
+			result.forEach(action -> {
+				syncCampaingnClueInfo(optional.get().getAppId(), marketingId, optional.get().getAdAccount(), action);
+			});
+		} else {
+		}
+		
 		return ResultBuilder.normalResult();
 	}
 
-	private void syncCampaingnClueInfo(Long marketingId,String adAccount, JsonNode userList) {
-		String token = qyWeixinService.getAccessToken("ww5b77b727717ccd72");
+	private void syncCampaingnClueInfo(String appId,Long marketingId,String adAccount, JsonNode userList) {
+		String token = qyWeixinService.getAccessToken(appId);
 		userList.forEach(action -> {
 			String userId = action.get("userid").asText();
 			String extUserId = action.get("external_userid").asText();

@@ -47,6 +47,18 @@ public class ThirdAccount extends TopBaseDomain {
 	 */
 	@Column(name = "expires_time")
 	private long expiresTime;
+	
+	/**
+	 * 企微-回调令牌
+	 */
+	@Column(name = "callback_token", length = 64)
+	private String callbackToken;
+	
+	/**
+	 * 企微-回调密钥
+	 */
+	@Column(name = "callback_key", length = 128)
+	private String callbackKey;
 
 	public Long getId() {
 		return id;
