@@ -233,18 +233,6 @@ public class QyWeixinService {
 		}
 	}
 	
-	public JsonNode listCustTags() {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = corpTagClient.listCorpTag(token);
-		JsonNode json = UtilJson.json2Object(result);
-		if (0 == json.get("errcode").intValue()) {
-			return json.get("tag_group");
-		} else {
-			logger.warn("--->listCorpTag返回错误：{}", json.get("errmsg"));
-			return null;
-		}
-	}
-	
 	public void addCustTags(String userId, String extUserId, List<String> tagList) {
 		String token = getAccessToken("ww5b77b727717ccd72");
 		String result = corpTagClient.addCorpTag(token, userId, extUserId, tagList);

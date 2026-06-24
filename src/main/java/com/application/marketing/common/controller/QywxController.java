@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.application.marketing.common.controller.dto.ListQywxDeptDTO;
+import com.application.marketing.common.controller.dto.ListQywxTagDTO;
 import com.application.marketing.common.controller.dto.ListQywxUserDTO;
 import com.application.marketing.common.domain.QywxUser;
 import com.application.marketing.common.repository.QywxUserV2Dao;
+import com.application.marketing.common.service.QywxCropTagService;
 import com.application.marketing.common.service.QywxDeptService;
 import com.application.marketing.common.service.QywxUserService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
 import com.javapai.framework.action.ResultBuilder;
 import com.javapai.framework.action.RstResult;
@@ -27,6 +30,9 @@ public class QywxController {
 
 	@Autowired
 	QywxUserService qywxUserService;
+	
+	@Autowired
+	QywxCropTagService qywxCropTagService;
 	
 	@Autowired
 	QywxUserV2Dao qywxUserV2Dao;
@@ -58,6 +64,19 @@ public class QywxController {
 		return qywxUserV2Dao.listUser(dto);
 	}
 	
+	/**
+	 * 数据查询（）。 <br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/listCustTags")
+	public RstResult<JsonNode> listCustTags(@RequestBody ListQywxTagDTO dto) {
+		if (StringUtils.isBlank(dto.getAppId())) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		}
+		return ResultBuilder.normalResult(qywxCropTagService.listCorpTags(dto.getAppId()));
+	}
 
 	/**
 	 * 数据同步。<br>
