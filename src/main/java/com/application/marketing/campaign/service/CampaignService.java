@@ -120,6 +120,10 @@ public class CampaignService extends AbstractBizService {
 			return false;
 		}
 		if (Marketing.TYPE_8 == optional.get().getType()) {
+			if (StringUtils.isBlank(optional.get().getExtid())) {
+				logger.info("--->营销活动关联外部标识为空，已跳过外部操作！");
+				return true;
+			}
 			EweixinResult result = acquisitionService.deleteHuokeLink(optional.get().getAppId(), optional.get().getExtid());
 			if (!result.ifSuccess()) {
 				logger.warn("--->删除操作异常：官方操作返回异常！");
