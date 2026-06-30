@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.application.marketing.common.controller.dto.ListQywxDeptDTO;
 import com.application.marketing.common.controller.dto.ListQywxTagDTO;
 import com.application.marketing.common.controller.dto.ListQywxUserDTO;
+import com.application.marketing.common.controller.dto.WeixinGroupCreate;
+import com.application.marketing.common.controller.dto.WeixinGroupMessage;
 import com.application.marketing.common.domain.QywxUser;
 import com.application.marketing.common.repository.QywxUserV2Dao;
 import com.application.marketing.common.service.QywxCropTagService;
 import com.application.marketing.common.service.QywxDeptService;
+import com.application.marketing.common.service.QywxMessageService;
 import com.application.marketing.common.service.QywxUserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.action.PageResult;
@@ -33,6 +36,9 @@ public class QywxController {
 	
 	@Autowired
 	QywxCropTagService qywxCropTagService;
+	
+	@Autowired
+	QywxMessageService qywxMessageService;
 	
 	@Autowired
 	QywxUserV2Dao qywxUserV2Dao;
@@ -76,6 +82,18 @@ public class QywxController {
 			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
 		}
 		return ResultBuilder.normalResult(qywxCropTagService.listCorpTags(dto.getAppId()));
+	}
+	
+	@RequestMapping("/creteWeixinGroup")
+	public RstResult<String> creteWeixinGroup(@RequestBody WeixinGroupCreate dto) {
+		String wxUserId = qywxMessageService.creteWeixinGroup(dto);
+		return ResultBuilder.normalResult(wxUserId);
+	}
+	
+	@RequestMapping("/messageWeixinGroup")
+	public RstResult<String> messageWeixinGroup(@RequestBody WeixinGroupMessage dto) {
+		qywxMessageService.messageWeixinGroup(dto);
+		return ResultBuilder.normalResult();
 	}
 
 	/**
