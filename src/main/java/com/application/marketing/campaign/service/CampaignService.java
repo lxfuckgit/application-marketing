@@ -97,20 +97,27 @@ public class CampaignService extends AbstractBizService {
 		return entity.getId();
 	}
 	
-	public Integer updateCampaign(Marketing marketing) {
+	public boolean updateCampaign(Marketing marketing) {
 		//先检查是否存在
 		java.util.Optional<Marketing> optional = marketingRepository.findById(marketing.getId());
 		if(optional.isEmpty()) {
 			throw new RuntimeException("营销记录不存在，ID: " + marketing.getId());
 		}
-		if (StringUtils.isNotBlank(marketing.getAdAccount())) {
-			if (!marketing.getAdAccount().equals(optional.get().getAdAccount())) {
-				String link = optional.get().getLink().split("?")[0];
-				optional.get().setLink(link + "?customer_channel=" + marketing.getAdAccount());
+		if (Marketing.TYPE_8 == optional.get().getType()) {
+			if (StringUtils.isBlank(optional.get().getExtid())) {
+				logger.info("--->营销活动关联外部标识为空，已跳过外部操作！");
+				return true;
+			}
+			List<String> partyList = marketingPartyDao.listPartyIdByMarketingId(optional.get().getId());
+			EweixinResult result = acquisitionService.updateHuokeLink(optional.get().getAppId(), optional.get().getExtid(), optional.get().getName(), partyList);
+			if (!result.ifSuccess()) {
+				logger.warn("--->更新操作异常：官方操作返回异常！");
+				return false;
 			}
 		}
 		marketingRepository.save(marketing);
-		return 1;
+		logger.info("--->营销活动更新完成！");
+		return true;
 	}
 
 	public boolean deleteById(Long id) {

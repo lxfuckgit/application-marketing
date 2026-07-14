@@ -60,6 +60,31 @@ public class QywxAcquisitionService extends QywxService {
 	}
 	
 	/**
+	 * 获客链接的修改。<br>
+	 * 
+	 * @param appId     应用标识<br>
+	 * @param linkId    获客链接标识<br>
+	 * @param linkName  链接名称<br>
+	 * @param staffList
+	 * @return
+	 */
+	public EweixinResult updateHuokeLink(String appId, String linkId, String linkName, List<String> staffList) {
+		String token = getAccessToken(appId);
+		return custAcquistionClient.updateLink(token,linkId, linkName, staffList);
+	}
+	
+	/**
+	 * 获客链接的读取。<br>
+	 * 
+	 * @param appId  应用标识<br>
+	 * @param linkId 获客链接标识<br>
+	 * @return
+	 */
+//	public EweixinResult getHuokeLink(String appId, String linkId) {
+//		return custAcquistionClient.getLink(getAccessToken(appId), linkId);
+//	}
+	
+	/**
 	 * 同步企业微信的“获客链接”关联的线索列表。
 	 */
 	public List<JsonNode> syncHuokeLinkClueList(String appId, String linkId) {
