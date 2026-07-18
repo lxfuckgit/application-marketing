@@ -94,7 +94,8 @@ public class QywxCallBackController {
 			if ("delete_link".equals(xmlcontent.get("ChangeType").asText())) {
 				customerAcquisitionEvent.eventDeleteLink(xmlcontent.get("LinkId").asText());
 			} else if ("friend_request".equals(xmlcontent.get("ChangeType").asText())) {
-				customerAcquisitionEvent.eventFriendRequest(xmlcontent.get("LinkId").asText());
+				String state = xmlcontent.get("State").asText();
+				customerAcquisitionEvent.eventFriendRequest(xmlcontent.get("LinkId").asText(), state);
 			} else if ("add_external_contact".equals(xmlcontent.get("ChangeType").asText())) {
 				String linkId = xmlcontent.get("State").asText();
 				String userId = xmlcontent.get("UserID").asText();
@@ -105,7 +106,19 @@ public class QywxCallBackController {
 				String userId = xmlcontent.get("UserID").asText();
 				String extUserId = xmlcontent.get("ExternalUserID").asText();
 				externalContactEvent.eventAddHalfExternalContact(linkId, userId, extUserId);
-			} else {
+			}else if("customer_start_chat".equals(xmlcontent.get("ChangeType").asText())){
+				String linkId = xmlcontent.get("LinkId").asText();
+				String userId = xmlcontent.get("UserID").asText();
+				String externalUserID = xmlcontent.get("ExternalUserID").asText();
+				customerAcquisitionEvent.customerStartChat(linkId, userId, externalUserID);
+			}else if ("message_from_customer".equals(xmlcontent.get("ChangeType").asText())) {
+				// 获取会话信息凭据 (新版回调核心字段)
+				String chatKey = xmlcontent.get("ChatKey").asText();
+				//企业微信CorpID
+				String corpId = xmlcontent.get("CorpID").asText();
+				// 异步或同步调用服务获取详情
+				customerAcquisitionEvent.eventMessageFromCustomer(chatKey, corpId);
+			}else {
 				logger.info("--->当前类型({})暂无处理...", xmlcontent.get("ChangeType").asText());
 			}
 			// 5. 普通业务事件回调结果返回字符串：success；提示：当返回非success企微也不会二次回调。
