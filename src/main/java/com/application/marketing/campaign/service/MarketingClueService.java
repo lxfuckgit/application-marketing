@@ -30,34 +30,34 @@ public class MarketingClueService {
 	 * @param extUserId
 	 * @return
 	 */
-	public Long createMarketingClue(Long marketingId, String userId, String extUserId) {
-		if (null == marketingId || StringUtils.isBlank(userId) || StringUtils.isBlank(extUserId)) {
+	public Long createMarketingClue(MarketingClue clue) {
+		if (null == clue.getMarketingId() || StringUtils.isBlank(clue.getUserId()) || StringUtils.isBlank(clue.getExtUserId())) {
+			logger.error("--->[{}]营销记录必要数据缺失!", clue.getMarketingId());
 			return 0L;
 		}
-		java.util.Optional<Marketing> optional = marketingRepository.findById(marketingId);
+		java.util.Optional<Marketing> optional = marketingRepository.findById(clue.getMarketingId());
 		if (optional.isEmpty()) {
-			logger.error("--->[{}]营销记录不存在!", marketingId);
+			logger.error("--->[{}]营销记录不存在!", clue.getMarketingId());
 			return 0L;
-		}
-
-		MarketingClue clue = marketingClueDao.findByMarketingIdAndUserIdAndExtUserId(marketingId, userId, extUserId);
-		if (null == clue) {
-			clue = new MarketingClue();
-			clue.setMarketingId(marketingId);
-			clue.setAdAccount(optional.get().getAdAccount());
-			clue.setUserId(userId);
-			clue.setExtUserId(extUserId);
-			WxCustContact customer = qyWeixinService.getWxCustomerInfo(extUserId);
-			if (null != customer) {
-				// 将[微信昵称]或[企微别名]当线索名称
-				clue.setExtUserName(customer.getName());
-			}
-			marketingClueDao.save(clue);
 		} else {
+			clue.setAdAccount(optional.get().getAdAccount());
+		}
+		
+		// 验证数据有效性
+		MarketingClue oldClue = marketingClueDao.findByMarketingIdAndUserIdAndExtUserId(clue.getMarketingId(), clue.getUserId(), clue.getExtUserId());
+		if(null != oldClue) {
 			logger.warn("--->当前营销线索重复，系统无法二次处理！");
 			return 0L;
 		}
+		
+		WxCustContact customer = qyWeixinService.getWxCustomerInfo(clue.getExtUserId());
+		if (null != customer) {
+			// 将[微信昵称]或[企微别名]当线索名称
+			clue.setExtUserName(customer.getName());
+		}
+		marketingClueDao.save(clue);
+//		logger.info("--->营销线索保存完毕！");
 		return 1L;
 	}
-
+	
 }

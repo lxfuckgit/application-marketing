@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.application.marketing.common.controller.vo.ChatCountVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.utils.UtilJson;
 import com.thirdparty.eweixin.CustAcquisitionClient;
@@ -115,6 +116,34 @@ public class QywxAcquisitionService extends QywxService {
 			}
 		}
 		return list;
+	}
+	
+	/**
+	 * 同步企业微信的“获客链接”关联的聊天详情。
+	 */
+	public ChatCountVO getChatInfo(String appId, String chatKey) {
+		String result = custAcquistionClient.getLinkChatInfo(getAccessToken(appId), chatKey);
+//		logger.info("--->解析结果：", result);
+
+		JsonNode json = UtilJson.json2Object(result);
+		// 不成功则直接退出
+		if (0 != json.get("errcode").intValue()) {
+			logger.warn("--->返回错误：{}", json.get("errmsg"));
+			return null;
+		}
+		if (!json.has("chat_info") || null == json.get("chat_info")) {
+			logger.warn("--->返回错误：{}", json.get("errmsg"));
+			return null;
+		}
+		// 成功则提取信息
+		ChatCountVO vo = new ChatCountVO();
+		vo.setLinkId(json.get("chat_info").get("link_id").asText());
+		vo.setState(json.get("chat_info").get("state").asText());
+		vo.setUserId(json.get("userid").asText());
+		vo.setExtUserId(json.get("external_userid").asText());
+		vo.setRecvMsgCnt(json.get("chat_info").get("recv_msg_cnt").intValue());
+		logger.info("--->解析结果：recvMsgCnt={}, state={}", vo.getRecvMsgCnt(), vo.getState());
+		return vo;
 	}
 
 }

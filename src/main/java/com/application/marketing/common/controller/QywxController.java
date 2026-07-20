@@ -1,6 +1,7 @@
 package com.application.marketing.common.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.application.marketing.common.controller.dto.WeixinGroupCreate;
 import com.application.marketing.common.controller.dto.WeixinGroupMessage;
 import com.application.marketing.common.domain.QywxUser;
 import com.application.marketing.common.repository.QywxUserV2Dao;
+import com.application.marketing.common.service.QywxAcquisitionService;
 import com.application.marketing.common.service.QywxCropTagService;
 import com.application.marketing.common.service.QywxDeptService;
 import com.application.marketing.common.service.QywxMessageService;
@@ -42,6 +44,9 @@ public class QywxController {
 	
 	@Autowired
 	QywxUserV2Dao qywxUserV2Dao;
+	
+	@Autowired
+	QywxAcquisitionService qywxAcquisitionService;
 
 	/**
 	 * 数据查询（企业微信-通讯录-部门列表）。 <br>
@@ -70,12 +75,15 @@ public class QywxController {
 		return qywxUserV2Dao.listUser(dto);
 	}
 	
-	/**
-	 * 数据查询（）。 <br>
-	 * 
-	 * @param dto
-	 * @return
-	 */
+//	@RequestMapping("/addCustTags")
+//	public RstResult<JsonNode> addCustTags() {
+//		String userId="TianGuoFa";
+//		String extUserId="wmqbSyHgAAM54fXDnYaDSj6g4pNDQxvg";
+//		List<String> tagList = List.of("etqbSyHgAA7nxQClAeHmvgu_HBWfbR8g","etqbSyHgAAPusU9SuwJf8FAmAemdoZOg");
+//		qyWeixinService.addCustTags(userId, extUserId, tagList);
+//		return ResultBuilder.normalResult();
+//	}
+	
 	@RequestMapping("/listCustTags")
 	public RstResult<JsonNode> listCustTags(@RequestBody ListQywxTagDTO dto) {
 		if (StringUtils.isBlank(dto.getAppId())) {
@@ -126,6 +134,24 @@ public class QywxController {
 			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
 		} else {
 			qywxUserService.syncDepartymentUser(dto.getAppId(), dto.getDeptId());
+		}
+		return ResultBuilder.normalResult();
+	}
+	
+	/**
+	 * 数据同步。<br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/syncQywxChatInfo")
+	public RstResult<String> syncQywxChatInfo(@RequestBody Map<String, String> dto) {
+		if (StringUtils.isBlank(dto.get("appId"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		} else if (StringUtils.isBlank(dto.get("chatKey"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
+		} else {
+			qywxAcquisitionService.getChatInfo(dto.get("appId"), dto.get("chatKey"));
 		}
 		return ResultBuilder.normalResult();
 	}

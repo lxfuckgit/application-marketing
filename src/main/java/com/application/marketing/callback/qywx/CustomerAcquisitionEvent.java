@@ -1,23 +1,26 @@
 package com.application.marketing.callback.qywx;
 
-import com.application.marketing.common.service.QywxService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.javapai.framework.utils.UtilJson;
+import com.application.marketing.common.controller.vo.ChatCountVO;
+import com.application.marketing.common.service.QywxAcquisitionService;
+import com.application.marketing.common.service.QywxCropTagService;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import com.application.marketing.campaign.domain.Marketing;
+import com.application.marketing.campaign.domain.MarketingClue;
+import com.application.marketing.campaign.domain.MarketingTag;
+import com.application.marketing.campaign.repository.MarketingClueDao;
+import com.application.marketing.campaign.repository.MarketingDao;
+import com.application.marketing.campaign.repository.MarketingTagDao;
 import com.application.marketing.campaign.service.CampaignService;
+import com.application.marketing.campaign.service.MarketingClueService;
 import com.javapai.framework.enums.StatusEnum;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 获客助手事件通知
@@ -29,12 +32,24 @@ public class CustomerAcquisitionEvent {
 
 	@Autowired
 	CampaignService campaignService;
+	
+	@Autowired
+	MarketingClueService marketingClueService;
 
 	@Autowired
-	RestTemplate restTemplate;
-
+	QywxCropTagService cropTagService;
+	
 	@Autowired
-	QywxService qywxService;
+	MarketingDao marketingDao;
+	
+	@Autowired
+	MarketingTagDao marketingTagDao;
+	
+	@Autowired
+	MarketingClueDao marketingClueDao;
+	
+	@Autowired
+	QywxAcquisitionService qywxAcquisitionService;
 
 	String url = "https://dj.lemanman.cn/admin-api/lpg/qiwei/create";
 
@@ -50,88 +65,92 @@ public class CustomerAcquisitionEvent {
 
 	/**
 	 * 通过获客链接发起好友请求事件。<br>
-	 * <strong>官方解释：</strong>当微信用户通过获客链接点击添加到通讯录，成功发起好友请求，回调此事件到创建该链接的应用。
+	 * 
+	 * <strong>官方解释：</strong>当微信用户通过获客链接点击添加到通讯录，成功发起好友请求，回调此事件到创建该链接的应用。<br>
+	 * <strong>重点提示：</strong>当前【获客链接】如果关闭[添加成员时需要验证]选项时，【微信用户】将直接添加【企业用户】成友好友并触发add_external_contact事件。<br>
 	 */
 	public void eventFriendRequest(String linkId, String state) {
-		logger.info("--->处理回调事件：eventFriendRequest参数：{}", linkId);
-		Map<String, Object> map = new HashMap<>();
-		map.put("state", state);
-		map.put("type", 0);
-		extracted(map);
+		logger.info("--->处理回调事件：eventFriendRequest参数：{}/{}", linkId, state);
 	}
-
-	void extracted(Map<String, Object> map) {
-		restTemplate.exchange(
-				url,
-				HttpMethod.POST,
-				new HttpEntity<>(map),
-				String.class
-				);
-	}
-
-	public void eventMessageFromCustomer(String chatKey, String corpId) {
-		String token = qywxService.getAccessToken(corpId);
-		String url = "https://qyapi.weixin.qq.com/cgi-bin/externalcontact/get_customer_acquisition_message?access_token=" + token;
-
-		String jsonBody = String.format("{\"chat_key\": \"%s\"}", chatKey);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
-
-		String response = restTemplate.postForObject(url, request, String.class);
-		logger.info("--->处理回调事件：eventMessageFromCustomer结果：{}", response);
-
-		if (response != null) {
-			JsonNode json = UtilJson.json2Object(response);
-			if (json != null) {
-				int errcode = json.has("errcode") ? json.get("errcode").asInt() : -1;
-				String errmsg = json.has("errmsg") ? json.get("errmsg").asText() : null;
-				String userid = json.has("userid") ? json.get("userid").asText() : null;
-				String externalUserId = json.has("external_userid") ? json.get("external_userid").asText() : null;
-				JsonNode chatInfo = json.has("chat_info") ? json.get("chat_info") : null;
-				String recvMsgCnt = null;
-				String state = null;
-				if (chatInfo != null) {
-					 recvMsgCnt = chatInfo.has("recv_msg_cnt") ? chatInfo.get("recv_msg_cnt").asText() : null;
-					 state = chatInfo.has("state") ? chatInfo.get("state").asText() : null;
-					logger.info("--->解析结果：recvMsgCnt={}, state={}", recvMsgCnt, state);
-				}
-
-				logger.info("--->解析结果：errcode={}, errmsg={}, userid={},externalUserId={}, recvMsgCnt={}, state={}", errcode, errmsg, userid,externalUserId, recvMsgCnt, state);
-				Map<String, Object> params = new HashMap<>();
-				params.put("userid", userid);
-				params.put("externalUserId", externalUserId);
-				params.put("recvMsgCnt", recvMsgCnt);
-				params.put("state", state);
-				params.put("type",2);
-
-				extracted(params);
-				if (0 == errcode) {
-					logger.info("--->获取获客消息成功，成员userid：{}", userid);
-				} else {
-					logger.warn("--->获取获客消息失败：{}", errmsg);
-				}
-			} else {
-				logger.warn("--->解析JSON响应失败，响应内容：{}", response);
-			}
-		}
-	}
-
+	
 	/**
 	 * 【获客链接】成员首次收外部用户的消息事件。<br>
-	 * <strong>官方解释：</strong>当微信用户通过获客链接点击添加到通讯录，成功发起好友请求，回调此事件到创建该链接的应用。
+	 * <strong>官方解释：</strong>授权企业中配置了客户联系功能的[内部成员]通过获客链接添加微信客户后，当成员首次收到客户消息时，回调此事件到创建相应链接的应用。。
+	 * 
+	 * @param linkId    获客链接标识。
+	 * @param userId    内部用户标识。
+	 * @param extUserId 外部用户标识。
+	 */
+	public void eventCustomerStartChat(String linkId, String userId, String extUserId) {
+		logger.info("--->处理回调事件：eventCustomerStartChat参数：{}-{}-{}", linkId, userId, extUserId);
+		
+		// 检查linkId有效性
+		Marketing marketing = marketingDao.findByTypeAndExtid(Marketing.TYPE_8, linkId);
+		if (null == marketing) {
+			logger.warn("--->异常：外部数据标识（{}）异常！", linkId);
+			return;
+		}
+		
+		/* 此事件绑定业务1：关联[外部用户]到线索数据 */
+		MarketingClue clue = new MarketingClue();
+		clue.setMarketingId(marketing.getId());
+		clue.setUserId(userId);
+		clue.setExtUserId(extUserId);
+		clue.setRecvMsgCnt(1);
+		Long r = marketingClueService.createMarketingClue(clue);
+		logger.info("--->提示：当前线索归档结果：{}", r);
+		
+		/* 此事件绑定业务2：给[外部用户]打标签 */
+		List<MarketingTag> tagList = marketingTagDao.findByMarketingId(marketing.getId());
+		if (null == tagList) {
+			logger.warn("--->异常：当前数据（{}）无关联标签！", marketing.getId());
+			return;
+		}
+		// 首次开聊事件就不考虑【重复打标签】的问题
+		cropTagService.addCustTags(marketing.getAppId(), userId, extUserId, tagList.stream().map(MarketingTag::getTagValue).collect(Collectors.toList()));
+		logger.info("--->提示：外部用户标签完成！");
+	}
+	
+	/**
+	 * 【获客链接】成员多次收外部用户的消息事件。<br>
 	 * 
 	 * @param linkId
 	 * @param userId
-	 * @param externalUserID
+	 * @param extUserId
+	 * @param chatKey
 	 */
-	public void customerStartChat(String linkId, String userId, String externalUserID) {
-		logger.info("--->成员首次收消息事件回调：firstTimeAcceptingMessage参数：{}-{}", userId, externalUserID);
-		Map<String, Object> params = new HashMap<>();
-		params.put("userid", userId);
-		params.put("externalUserId", externalUserID);
-		params.put("type", 3);
-		extracted(params);
+	public void eventMessageFromCustomer(String linkId, String chatKey) {
+		logger.info("--->处理回调事件：eventMessageFromCustomer参数：{}", linkId);
+		
+		// 检查linkId有效性
+		Marketing marketing = marketingDao.findByTypeAndExtid(Marketing.TYPE_8, linkId);
+		if (null == marketing) {
+			logger.warn("--->异常：外部数据标识（{}）异常！", linkId);
+			return;
+		}
+		
+		// 同步会话数量并更新会话数量
+		ChatCountVO chatCount = qywxAcquisitionService.getChatInfo(marketing.getAppId(), chatKey);
+		if (null == chatCount) {
+			logger.warn("--->异常：成员消息数据读取异常！");
+			return;
+		}
+		String userId = chatCount.getUserId();
+		String extUserId = chatCount.getExtUserId();
+		MarketingClue clue = marketingClueDao.findByMarketingIdAndUserIdAndExtUserId(marketing.getId(), userId, extUserId);
+		if (null == clue) {
+			clue = new MarketingClue();
+			clue.setMarketingId(marketing.getId());
+			clue.setUserId(userId);
+			clue.setExtUserId(extUserId);
+			clue.setChatKey(chatKey);
+			clue.setRecvMsgCnt(chatCount.getRecvMsgCnt());
+			marketingClueDao.save(clue);
+		} else {
+			clue.setChatKey(chatKey);
+			clue.setRecvMsgCnt(chatCount.getRecvMsgCnt());
+			marketingClueDao.save(clue);
+		}
+		logger.info("--->事件eventMessageFromCustomer会话（{}-{}-{}）凭据更新完毕！", linkId, userId, extUserId);
 	}
 }

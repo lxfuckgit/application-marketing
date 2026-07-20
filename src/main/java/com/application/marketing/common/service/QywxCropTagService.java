@@ -1,5 +1,7 @@
 package com.application.marketing.common.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ public class QywxCropTagService extends QywxService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	CorpTagClient corpTagClient = new CorpTagClient();
-
+	
 	public JsonNode listCorpTags(String appId) {
 		String result = corpTagClient.listCorpTag(getAccessToken(appId));
 		JsonNode json = UtilJson.json2Object(result);
@@ -26,5 +28,11 @@ public class QywxCropTagService extends QywxService {
 			logger.warn("--->listCorpTag返回错误：{}", json.get("errmsg"));
 			return null;
 		}
+	}
+	
+	public void addCustTags(String appId, String userId, String extUserId, List<String> tagList) {
+		String token = getAccessToken(appId);
+		String result = corpTagClient.addCorpTag(token, userId, extUserId, tagList);
+		logger.warn("--->addCustTags返回：{}", result);
 	}
 }

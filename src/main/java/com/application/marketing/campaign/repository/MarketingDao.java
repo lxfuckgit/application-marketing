@@ -6,5 +6,7 @@ import com.application.marketing.campaign.domain.Marketing;
 
 public interface MarketingDao extends PagingAndSortingRepository<Marketing, Long> {
 	Marketing findByExtid(String extid);
+	
+	Marketing findByTypeAndExtid(Integer type, String extid);
 
 }

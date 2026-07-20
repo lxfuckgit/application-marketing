@@ -100,4 +100,20 @@ public class ThirdAccount extends TopBaseDomain {
 		this.expiresTime = expiresTime;
 	}
 
+	public String getCallbackToken() {
+		return callbackToken;
+	}
+
+	public void setCallbackToken(String callbackToken) {
+		this.callbackToken = callbackToken;
+	}
+
+	public String getCallbackKey() {
+		return callbackKey;
+	}
+
+	public void setCallbackKey(String callbackKey) {
+		this.callbackKey = callbackKey;
+	}
+	
 }

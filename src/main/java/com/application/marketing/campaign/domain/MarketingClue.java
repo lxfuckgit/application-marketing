@@ -25,7 +25,7 @@ public class MarketingClue extends TopBaseDomain {
 	@Column(name = "marketing_id", length = 10, nullable = false)
 	private Long marketingId;
 	/**
-	 * 广告账户(冗余设计-业务端常规情况下一次营销只会关联一个广告账户）
+	 * 广告账户(冗余设计-防止业务端中途变更账户的情况）
 	 */
 	@Column(name = "ad_account", length = 32, nullable = false)
 	private String adAccount;
@@ -49,6 +49,18 @@ public class MarketingClue extends TopBaseDomain {
 	 */
 	@Column(name = "ext_user_tag", length = 30)
 	private String extUserTag;
+
+	/**
+	 * 外部会话凭据
+	 */
+	@Column(name = "chat_key", length = 32, nullable = false)
+	private String chatKey;
+
+	/**
+	 * 成员收到的此客户的消息次数
+	 */
+	@Column(name = "recv_msg_cnt", length = 11)
+	private Integer recvMsgCnt;
 
 	public Long getId() {
 		return id;
@@ -104,6 +116,22 @@ public class MarketingClue extends TopBaseDomain {
 
 	public void setExtUserTag(String extUserTag) {
 		this.extUserTag = extUserTag;
+	}
+
+	public String getChatKey() {
+		return chatKey;
+	}
+
+	public void setChatKey(String chatKey) {
+		this.chatKey = chatKey;
+	}
+
+	public Integer getRecvMsgCnt() {
+		return recvMsgCnt;
+	}
+
+	public void setRecvMsgCnt(Integer recvMsgCnt) {
+		this.recvMsgCnt = recvMsgCnt;
 	}
 
 }

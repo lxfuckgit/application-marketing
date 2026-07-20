@@ -15,17 +15,12 @@ import com.application.marketing.common.controller.vo.WXTokenVO;
 import com.application.marketing.common.controller.vo.WxUserInfo;
 import com.application.marketing.common.domain.ThirdAccount;
 import com.application.marketing.common.repository.ThirdAccountDao;
-import com.application.marketing.controller.dto.WeixinGroupCreate;
-import com.application.marketing.controller.dto.WeixinGroupMessage;
-import com.application.marketing.domain.MessageGroup;
-import com.application.marketing.repository.MessageGroupDao;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.javapai.framework.utils.UtilJson;
 import com.thirdparty.eweixin.CorpTagClient;
 import com.thirdparty.eweixin.CustAcquisitionClient;
 import com.thirdparty.eweixin.CustomerClient;
 import com.thirdparty.eweixin.DeptInfoClient;
-import com.thirdparty.eweixin.GroupChatClient;
 import com.thirdparty.eweixin.QiyeWeixinClient;
 import com.thirdparty.eweixin.UserInfoClient;
 import com.thirdparty.params.WxCustContact;
@@ -41,16 +36,11 @@ public class QyWeixinService {
 	@Autowired
 	MarketingDao marketingDao;
 	
-	@Autowired
-	MessageGroupDao messageGroupDao;
-	
 	CustomerClient customerClient = new CustomerClient();
 	
 	UserInfoClient userInfoClient = new UserInfoClient();
 	
 	DeptInfoClient deptInfoClient = new DeptInfoClient();
-	
-	GroupChatClient groupChatClient = new GroupChatClient();
 	
 	QiyeWeixinClient qiyeWeixinClient = new QiyeWeixinClient();
 	
@@ -117,37 +107,6 @@ public class QyWeixinService {
 		}
 	}
 	
-	public String creteWeixinGroup(WeixinGroupCreate dto) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = groupChatClient.createGroupChat(token, null, dto.getGroupName(), null, dto.getMemberList());
-		JsonNode json = UtilJson.json2Object(result);
-		if (0 == json.get("errcode").intValue()) {
-			MessageGroup group = new MessageGroup();
-			group.setGroupName(dto.getGroupName());
-			group.setGroupChannel("qyweixin");
-			group.setExtId(json.get("chatid").asText());
-			messageGroupDao.save(group);
-			return json.get("chatid").asText();
-		} else {
-			logger.warn("--->creteWeixinGroup返回错误：{}", json.get("errmsg"));
-			return null;
-		}
-	}
-	
-	public void messageWeixinGroup(WeixinGroupMessage dto) {
-		if (StringUtils.isBlank(dto.getGroupId()) || StringUtils.isBlank(dto.getContent())) {
-			logger.warn("--->messageWeixinGroup消息内容为空！");
-		}
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = groupChatClient.sendToGruopChat(token, dto.getGroupId(), dto.getContent(), "text", dto.getMemberList());
-		JsonNode json = UtilJson.json2Object(result);
-		if (0 == json.get("errcode").intValue()) {
-			logger.info("--->messageWeixinGroup消息发送完毕！");
-		} else {
-			logger.warn("--->messageWeixinGroup返回错误：{}", json.get("errmsg"));
-		}
-	}
-
 	public String getAccessToken(String appId) {
 		ThirdAccount ta = thirdAccountDao.findByAppId(appId);
 		if (null == ta) {
@@ -231,12 +190,6 @@ public class QyWeixinService {
 			logger.warn("--->接口（listDeptUser）通信异常！");
 			return null;
 		}
-	}
-	
-	public void addCustTags(String userId, String extUserId, List<String> tagList) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = corpTagClient.addCorpTag(token, userId, extUserId, tagList);
-		logger.warn("--->addCustTags返回：{}", result);
 	}
 	
 	public WxDeptInfo getWxDeptInfo(String token, String wxDeptId) {
