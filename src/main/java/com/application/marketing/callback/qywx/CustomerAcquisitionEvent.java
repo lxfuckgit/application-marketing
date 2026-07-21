@@ -1,6 +1,8 @@
 package com.application.marketing.callback.qywx;
 
 import com.application.marketing.common.controller.vo.ChatCountVO;
+import com.application.marketing.common.domain.QywxFriend;
+import com.application.marketing.common.repository.QywxFriendDao;
 import com.application.marketing.common.service.QywxAcquisitionService;
 import com.application.marketing.common.service.QywxCropTagService;
 
@@ -49,6 +51,9 @@ public class CustomerAcquisitionEvent {
 	MarketingClueDao marketingClueDao;
 	
 	@Autowired
+	QywxFriendDao qywxFriendDao;
+	
+	@Autowired
 	QywxAcquisitionService qywxAcquisitionService;
 
 	String url = "https://dj.lemanman.cn/admin-api/lpg/qiwei/create";
@@ -71,6 +76,13 @@ public class CustomerAcquisitionEvent {
 	 */
 	public void eventFriendRequest(String linkId, String state) {
 		logger.info("--->处理回调事件：eventFriendRequest参数：{}/{}", linkId, state);
+		QywxFriend frend = qywxFriendDao.findByLinkIdAndState(linkId, state);
+		if (null == frend) {
+			frend = new QywxFriend(linkId, state);
+		} else {
+			logger.info("--->FriendRequest二次请求参数：{}/{}", linkId, state);
+		}
+		qywxFriendDao.save(frend);
 	}
 	
 	/**
