@@ -4,10 +4,7 @@ import com.application.marketing.common.controller.vo.ChatCountVO;
 import com.application.marketing.common.domain.QywxFriend;
 import com.application.marketing.common.repository.QywxFriendDao;
 import com.application.marketing.common.service.QywxAcquisitionService;
-import com.application.marketing.common.service.QywxCropTagService;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import com.application.marketing.component.DataNotice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.application.marketing.campaign.domain.Marketing;
 import com.application.marketing.campaign.domain.MarketingClue;
-import com.application.marketing.campaign.domain.MarketingTag;
 import com.application.marketing.campaign.repository.MarketingClueDao;
 import com.application.marketing.campaign.repository.MarketingDao;
 import com.application.marketing.campaign.repository.MarketingTagDao;
@@ -29,7 +25,6 @@ import com.javapai.framework.enums.StatusEnum;
  */
 @Component
 public class CustomerAcquisitionEvent {
-	/**/
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
@@ -38,9 +33,6 @@ public class CustomerAcquisitionEvent {
 	@Autowired
 	MarketingClueService marketingClueService;
 
-	@Autowired
-	QywxCropTagService cropTagService;
-	
 	@Autowired
 	MarketingDao marketingDao;
 	
@@ -54,10 +46,10 @@ public class CustomerAcquisitionEvent {
 	QywxFriendDao qywxFriendDao;
 	
 	@Autowired
+	DataNotice dataNotice;
+	
+	@Autowired
 	QywxAcquisitionService qywxAcquisitionService;
-
-	String url = "https://dj.lemanman.cn/admin-api/lpg/qiwei/create";
-
 
 	/**
 	 * 删除获客链接事件
@@ -79,6 +71,8 @@ public class CustomerAcquisitionEvent {
 		QywxFriend frend = qywxFriendDao.findByLinkIdAndState(linkId, state);
 		if (null == frend) {
 			frend = new QywxFriend(linkId, state);
+			// 数据同步
+			dataNotice.doDateNotice(state, 0);
 		} else {
 			logger.info("--->FriendRequest二次请求参数：{}/{}", linkId, state);
 		}
@@ -103,24 +97,26 @@ public class CustomerAcquisitionEvent {
 			return;
 		}
 		
-		/* 此事件绑定业务1：关联[外部用户]到线索数据 */
-		MarketingClue clue = new MarketingClue();
-		clue.setMarketingId(marketing.getId());
-		clue.setUserId(userId);
-		clue.setExtUserId(extUserId);
-		clue.setRecvMsgCnt(1);
-		Long r = marketingClueService.createMarketingClue(clue);
-		logger.info("--->提示：当前线索归档结果：{}", r);
-		
-		/* 此事件绑定业务2：给[外部用户]打标签 */
-		List<MarketingTag> tagList = marketingTagDao.findByMarketingId(marketing.getId());
-		if (null == tagList) {
-			logger.warn("--->异常：当前数据（{}）无关联标签！", marketing.getId());
-			return;
+		/* 此事件绑定业务1：更新线索数据[相互接收消息统计] */
+		MarketingClue clue = marketingClueDao.findByMarketingIdAndUserIdAndExtUserId(marketing.getId(), userId, extUserId);
+		if (null == clue) {
+			clue = new MarketingClue();
+			clue.setMarketingId(marketing.getId());
+			clue.setUserId(userId);
+			clue.setExtUserId(extUserId);
+			clue.setRecvMsgCnt(1);
+			Long r = marketingClueService.createMarketingClue(clue);
+			logger.info("--->提示：当前线索归档结果：{}", r);
+		} else {
+			clue.setRecvMsgCnt(1);
+			marketingClueDao.save(clue);
+			logger.info("--->提示：当前线索首次开口归档！");
 		}
-		// 首次开聊事件就不考虑【重复打标签】的问题
-		cropTagService.addCustTags(marketing.getAppId(), userId, extUserId, tagList.stream().map(MarketingTag::getTagValue).collect(Collectors.toList()));
-		logger.info("--->提示：外部用户标签完成！");
+		
+		/* 此事件绑定业务2：时实同步数据[先不考虑耦合性-后期优化] */
+		if (null != clue.getExposureId()) {
+			dataNotice.doDateNotice(clue.getExposureId(), 2);
+		}
 	}
 	
 	/**
@@ -155,6 +151,7 @@ public class CustomerAcquisitionEvent {
 			clue.setMarketingId(marketing.getId());
 			clue.setUserId(userId);
 			clue.setExtUserId(extUserId);
+			clue.setAdAccount(marketing.getAdAccount());
 			clue.setChatKey(chatKey);
 			clue.setRecvMsgCnt(chatCount.getRecvMsgCnt());
 			marketingClueDao.save(clue);
@@ -164,5 +161,10 @@ public class CustomerAcquisitionEvent {
 			marketingClueDao.save(clue);
 		}
 		logger.info("--->事件eventMessageFromCustomer会话（{}-{}-{}）凭据更新完毕！", linkId, userId, extUserId);
+		
+		// 时实同步数据[先不考虑耦合性-后期优化]
+		if (null != clue.getExposureId()) {
+			dataNotice.doDateNotice(clue.getExposureId(), chatCount.getRecvMsgCnt());
+		}
 	}
 }

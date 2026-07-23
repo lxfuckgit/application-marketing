@@ -114,10 +114,13 @@ public class QywxCallBackController {
 				String state = xmlcontent.get("State").asText();
 				customerAcquisitionEvent.eventFriendRequest(linkId, state);
 			} else if ("add_external_contact".equals(xmlcontent.get("ChangeType").asText())) {
-//				String linkId = xmlcontent.get("State").asText();
+				String state = null;
+				if (xmlcontent.has("State")) {
+					state = xmlcontent.get("State").asText();
+				}
 				String userId = xmlcontent.get("UserID").asText();
 				String extUserId = xmlcontent.get("ExternalUserID").asText();
-				externalContactEvent.eventAddExternalContact(appId, userId, extUserId);
+				externalContactEvent.eventAddExternalContact(appId, userId, extUserId, state);
 			} else if ("add_half_external_contact".equals(xmlcontent.get("ChangeType").asText())) {
 				String linkId = xmlcontent.get("State").asText();
 				String userId = xmlcontent.get("UserID").asText();

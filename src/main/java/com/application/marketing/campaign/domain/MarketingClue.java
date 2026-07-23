@@ -53,7 +53,7 @@ public class MarketingClue extends TopBaseDomain {
 	/**
 	 * 外部会话凭据
 	 */
-	@Column(name = "chat_key", length = 32, nullable = false)
+	@Column(name = "chat_key", length = 100)
 	private String chatKey;
 
 	/**
@@ -61,6 +61,12 @@ public class MarketingClue extends TopBaseDomain {
 	 */
 	@Column(name = "recv_msg_cnt", length = 11)
 	private Integer recvMsgCnt;
+
+	/**
+	 * 营销序列号（每个营销活动每次营销曝光都会产生一个序列号）
+	 */
+	@Column(name = "exposure‌_id", length = 32)
+	private String exposureId;
 
 	public Long getId() {
 		return id;
@@ -132,6 +138,14 @@ public class MarketingClue extends TopBaseDomain {
 
 	public void setRecvMsgCnt(Integer recvMsgCnt) {
 		this.recvMsgCnt = recvMsgCnt;
+	}
+
+	public String getExposureId() {
+		return exposureId;
+	}
+
+	public void setExposureId(String exposureId) {
+		this.exposureId = exposureId;
 	}
 
 }

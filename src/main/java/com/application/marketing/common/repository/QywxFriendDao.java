@@ -7,6 +7,8 @@ import com.application.marketing.common.domain.QywxFriend;
 
 @Repository
 public interface QywxFriendDao extends PagingAndSortingRepository<QywxFriend, Long> {
+	QywxFriend findByState(String state);
+	
 	QywxFriend findByLinkIdAndState(String linkId, String state);
 
 //	@Query("SELECT qc FROM QywxFriend qc WHERE qc.linkId = :linkId and qc.userId = :userId and qc.externalUserId = :externalUserId")

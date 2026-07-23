@@ -183,6 +183,15 @@ public class CampaignService extends AbstractBizService {
 			sb.append(" and ext_user_name=?");
 			params.add(dto.getExtUserName());
 		}
+		if (StringUtils.isNotBlank(dto.getExposure‌Id())) {
+			sb.append(" and exposure‌_id=?");
+			params.add(dto.getExposure‌Id());
+		}
+		if (null != dto.getCreateTime() && dto.getCreateTime().length == 2) {
+			sb.append(" and (create_time>=? and create_time<=?)");
+			params.add(dto.getCreateTime()[0]);
+			params.add(dto.getCreateTime()[1]);
+		}
 		return getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(), MarketingClue.class);
 	}
 	
@@ -197,28 +206,4 @@ public class CampaignService extends AbstractBizService {
 		return true;
 	}
 	
-//	public void deleteAll(List<Long> ids) {
-//		marketingRepository.deleteAllById(ids);
-//	}
-
-//	public List<Marketing> saveAll(List<Marketing> marketingList) {
-//		return marketingRepository.saveAll(marketingList);
-//	}
-	
-//	public List<Marketing> findByName(String name) {
-//		return marketingRepository.findByName(name);
-//	}
-//
-//	public List<Marketing> findByStatus(String status) {
-//		return marketingRepository.findByStatus(status);
-//	}
-//
-//	public List<Marketing> findByChannel(String channel) {
-//		return marketingRepository.findByChannel(channel);
-//	}
-//
-//	public List<Marketing> findByNameLike(String name) {
-//		return marketingRepository.findByNameContaining(name);
-//	}
-//
 }

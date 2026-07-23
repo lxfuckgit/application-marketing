@@ -1,8 +1,16 @@
 package com.application.marketing.campaign.controller.dto;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.javapai.framework.common.page.BasePageArgs;
+import com.javapai.framework.utils.UtilDateTime;
 
 public class MarketingClueListDTO extends BasePageArgs {
+	/**
+	 * 曝光标识
+	 */
+	private String exposure‌Id;
 	/**
 	 * 线索名称
 	 */
@@ -19,6 +27,19 @@ public class MarketingClueListDTO extends BasePageArgs {
 	 * 外部用户名称
 	 */
 	private String extUserName;
+	/**
+	 * 创建时间
+	 */
+	@JsonFormat(pattern = UtilDateTime.FORMAT_DATE_TIME1, timezone = "GMT+8")
+	private LocalDateTime[] createTime;
+	
+	public String getExposure‌Id() {
+		return exposure‌Id;
+	}
+
+	public void setExposure‌Id(String exposure‌Id) {
+		this.exposure‌Id = exposure‌Id;
+	}
 
 	public String getClueName() {
 		return clueName;
@@ -52,4 +73,12 @@ public class MarketingClueListDTO extends BasePageArgs {
 		this.extUserName = extUserName;
 	}
 
+	public LocalDateTime[] getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(LocalDateTime[] createTime) {
+		this.createTime = createTime;
+	}
+	
 }
