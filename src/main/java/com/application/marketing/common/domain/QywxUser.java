@@ -31,10 +31,14 @@ public class QywxUser {
 	 */
 	@Column(name = "user_id", length = 32, nullable = false)
 	private String userId;
-
+	/**
+	 * 企微成员名称
+	 */
 	@Column(name = "user_name", length = 30, nullable = false)
 	private String userName;
-
+	/**
+	 * 企微成员昵称
+	 */
 	@Column(name = "nick_name", length = 60, nullable = false)
 	private String nickName;
 

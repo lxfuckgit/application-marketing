@@ -17,13 +17,17 @@ public class MarketingCreateDTO {
 	 */
 	private String name;
 	/**
-	 * 活动服务人员（例如：客服）
+	 * 活动关联的竞价师
 	 */
-	private List<String> staffList;
+	private String bidderId;
 	/**
 	 * 活动关联的广告账户
 	 */
 	private String adAccount;
+	/**
+	 * 活动服务人员（例如：客服）
+	 */
+	private List<String> staffList;
 	/**
 	 * 活动关联的标签信息
 	 */
@@ -60,13 +64,13 @@ public class MarketingCreateDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public List<String> getStaffList() {
-		return staffList;
+	
+	public String getBidderId() {
+		return bidderId;
 	}
 
-	public void setStaffList(List<String> staffList) {
-		this.staffList = staffList;
+	public void setBidderId(String bidderId) {
+		this.bidderId = bidderId;
 	}
 
 	public String getAdAccount() {
@@ -75,6 +79,14 @@ public class MarketingCreateDTO {
 
 	public void setAdAccount(String adAccount) {
 		this.adAccount = adAccount;
+	}
+
+	public List<String> getStaffList() {
+		return staffList;
+	}
+
+	public void setStaffList(List<String> staffList) {
+		this.staffList = staffList;
 	}
 
 	public List<String> getTagList() {

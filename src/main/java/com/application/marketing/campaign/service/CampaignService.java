@@ -61,6 +61,14 @@ public class CampaignService extends AbstractBizService {
 		entity.setCreateId(String.valueOf(dto.getUserId()));
 		marketingRepository.save(entity);
 		logger.info("--->营销活动创建结果：{}", entity.getId());
+		/* 创建营销活动-竞价人员 */
+		if (StringUtils.isNotBlank(dto.getBidderId())) {
+			MarketingParty party = new MarketingParty();
+			party.setMarketingId(entity.getId());
+			party.setPartyType(9);
+			party.setPartyId(dto.getBidderId());
+			marketingPartyDao.save(party);
+		}
 		/* 创建营销活动-关联人员 */
 		dto.getStaffList().forEach(staffId -> {
 			MarketingParty party = new MarketingParty();
