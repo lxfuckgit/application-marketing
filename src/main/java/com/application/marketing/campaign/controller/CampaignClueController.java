@@ -61,10 +61,11 @@ public class CampaignClueController {
 			throw new RuntimeException("营销记录不存在，ID: " + marketingId);
 		}
 
-		if (optional.get().getType() == 8) {
-			List<JsonNode> result = acquisitionService.syncHuokeLinkClueList(optional.get().getAppId(), optional.get().getExtid());
+		if (Marketing.TYPE_8 == optional.get().getType()) {
+			String appId = optional.get().getAppId();
+			List<JsonNode> result = acquisitionService.syncHuokeLinkClueList(appId, optional.get().getExtid());
 			result.forEach(action -> {
-				syncCampaingnClueInfo(optional.get().getAppId(), marketingId, optional.get().getAdAccount(), action);
+				syncCampaingnClueInfo(appId, marketingId, optional.get().getAdAccount(), action);
 			});
 		} else {
 		}
@@ -72,6 +73,13 @@ public class CampaignClueController {
 		return ResultBuilder.normalResult();
 	}
 
+	/**
+	 * 
+	 * @param appId
+	 * @param marketingId
+	 * @param adAccount
+	 * @param userList
+	 */
 	private void syncCampaingnClueInfo(String appId,Long marketingId,String adAccount, JsonNode userList) {
 		String token = qyWeixinService.getAccessToken(appId);
 		userList.forEach(action -> {

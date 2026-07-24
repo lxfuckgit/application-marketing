@@ -29,8 +29,7 @@ public class QywxUserV2Dao extends AbstractBizService {
 			params.add("%" + dto.getNickName() + "%");
 		}
 //		sb.append(" order by create_time desc");
-		PageResult<QywxUser> result = getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(),
-				QywxUser.class);
+		PageResult<QywxUser> result = getPage(sb.toString(), params, dto.getPageIndex(), dto.getPageSize(), QywxUser.class);
 //		result.getData().forEach(action -> {
 //			ClaimDTO oc = orderClaimRepository.getOrderClaimByOrderId(action.getId());
 //			if (null != oc) {

@@ -5,6 +5,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import com.application.marketing.common.domain.QywxUser;
 
 public interface QywxUserDao extends PagingAndSortingRepository<QywxUser, Long> {
-	QywxUser findByExtUserId(String extUserId);
+	QywxUser findByUserId(String userId);
 
 }

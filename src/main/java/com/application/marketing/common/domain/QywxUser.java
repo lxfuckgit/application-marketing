@@ -29,8 +29,8 @@ public class QywxUser {
 	/**
 	 * 企微成员ID
 	 */
-	@Column(name = "ext_user_id", length = 32, nullable = false)
-	private String extUserId;
+	@Column(name = "user_id", length = 32, nullable = false)
+	private String userId;
 
 	@Column(name = "user_name", length = 30, nullable = false)
 	private String userName;
@@ -61,13 +61,13 @@ public class QywxUser {
 	public void setDeptId(String deptId) {
 		this.deptId = deptId;
 	}
-
-	public String getExtUserId() {
-		return extUserId;
+	
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setExtUserId(String extUserId) {
-		this.extUserId = extUserId;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {

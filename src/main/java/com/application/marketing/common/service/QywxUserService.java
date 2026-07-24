@@ -32,13 +32,13 @@ public class QywxUserService extends QywxService {
 					logger.warn("--->接口（getWxUserInfo）通信异常!");
 				}
 				// 同步处理本地数据
-				QywxUser entity = qywxUserDao.findByExtUserId(info.getUserid());
+				QywxUser entity = qywxUserDao.findByUserId(info.getUserid());
 				if (null == entity) {
 					entity = new QywxUser();
-					entity.setExtUserId(info.getUserid());
 				}
 				entity.setAppId(appId);
 				entity.setDeptId(deptId);
+				entity.setUserId(info.getUserid());
 				entity.setUserName(info.getName());
 				entity.setNickName(info.getName());
 				qywxUserDao.save(entity);

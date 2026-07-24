@@ -6,6 +6,7 @@ import com.application.marketing.common.repository.QywxFriendDao;
 import com.application.marketing.common.service.QywxAcquisitionService;
 import com.application.marketing.component.DataNotice;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +70,15 @@ public class CustomerAcquisitionEvent {
 	public void eventFriendRequest(String linkId, String state) {
 		logger.info("--->处理回调事件：eventFriendRequest参数：{}/{}", linkId, state);
 		QywxFriend frend = qywxFriendDao.findByLinkIdAndState(linkId, state);
-		if (null == frend) {
+		if (StringUtils.isNotBlank(state) && null == frend) {
+			// 当state为空时，记录qywx_friend无意义。
 			frend = new QywxFriend(linkId, state);
+			qywxFriendDao.save(frend);
 			// 数据同步
 			dataNotice.doDateNotice(state, 0);
 		} else {
 			logger.info("--->FriendRequest二次请求参数：{}/{}", linkId, state);
 		}
-		qywxFriendDao.save(frend);
 	}
 	
 	/**
