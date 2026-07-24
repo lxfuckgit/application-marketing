@@ -27,6 +27,11 @@ public class QywxDeptService extends QywxService {
 
 	DeptInfoClient deptInfoClient = new DeptInfoClient();
 
+	/**
+	 * 数据同步-同步企业关联部门。<br>
+	 * 
+	 * @param appId
+	 */
 	public void syncDepartyment(String appId) {
 		String token = getAccessToken(appId);
 		String result = deptInfoClient.listDept(token, null);

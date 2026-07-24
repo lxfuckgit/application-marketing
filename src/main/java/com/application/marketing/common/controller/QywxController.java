@@ -2,6 +2,7 @@ package com.application.marketing.common.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,30 @@ public class QywxController {
 		return qywxUserV2Dao.listUser(dto);
 	}
 	
+	/**
+	 * 数据查询（通过电话号码-换取企业微信端的内部用户标识）。
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/getUserIdByMobile")
+	public RstResult<String> getUserByMobile(@RequestBody Map<String, String> dto) {
+		if (StringUtils.isBlank(dto.get("appId"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		}
+		if (StringUtils.isBlank(dto.get("mobile"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_PHONE);
+		}
+		String wxUserId = qywxUserService.getUserIdByMobile(dto.get("appId"), dto.get("mobile"));
+		if (!Objects.isNull(wxUserId)) {
+			RstResult<String> result = ResultBuilder.normalResult();
+			result.setData(wxUserId);
+			return result;
+		} else {
+			return ResultBuilder.buildResult(ErrorCode.EXCEPTION_SELECT);
+		}
+	}
+	
 //	@RequestMapping("/addCustTags")
 //	public RstResult<JsonNode> addCustTags() {
 //		String userId="TianGuoFa";
@@ -103,57 +128,4 @@ public class QywxController {
 		qywxMessageService.messageWeixinGroup(dto);
 		return ResultBuilder.normalResult();
 	}
-
-	/**
-	 * 数据同步。<br>
-	 * 
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/syncQywxDepartyment")
-	public RstResult<String> syncQywxDepartyment(@RequestBody ListQywxDeptDTO dto) {
-		if (StringUtils.isBlank(dto.getAppId())) {
-			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
-		} else {
-			qywxPartyService.syncDepartyment(dto.getAppId());
-		}
-		return ResultBuilder.normalResult();
-	}
-
-	/**
-	 * 数据同步。<br>
-	 * 
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/syncQywxDepartymentUser")
-	public RstResult<String> syncQywxDepartymentUser(@RequestBody ListQywxUserDTO dto) {
-		if (StringUtils.isBlank(dto.getAppId())) {
-			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
-		} else if (StringUtils.isBlank(dto.getDeptId())) {
-			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
-		} else {
-			qywxUserService.syncDepartymentUser(dto.getAppId(), dto.getDeptId());
-		}
-		return ResultBuilder.normalResult();
-	}
-	
-	/**
-	 * 数据同步。<br>
-	 * 
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/syncQywxChatInfo")
-	public RstResult<String> syncQywxChatInfo(@RequestBody Map<String, String> dto) {
-		if (StringUtils.isBlank(dto.get("appId"))) {
-			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
-		} else if (StringUtils.isBlank(dto.get("chatKey"))) {
-			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
-		} else {
-			qywxAcquisitionService.getChatInfo(dto.get("appId"), dto.get("chatKey"));
-		}
-		return ResultBuilder.normalResult();
-	}
-
 }

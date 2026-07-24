@@ -95,18 +95,6 @@ public class QyWeixinService {
 ////		});
 //	}
 
-	public String getUserByMobile(String mobile) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		String result = userInfoClient.getUserIdByMobile(token, mobile);
-		JsonNode json = UtilJson.json2Object(result);
-		if (0 == json.get("errcode").intValue()) {
-			return json.get("userid").asText();
-		} else {
-			logger.warn("--->getUserIdByMobile返回错误：{}", json.get("errmsg"));
-			return null;
-		}
-	}
-	
 	public String getAccessToken(String appId) {
 		ThirdAccount ta = thirdAccountDao.findByAppId(appId);
 		if (null == ta) {
