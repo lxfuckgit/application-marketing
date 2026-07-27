@@ -50,10 +50,14 @@ public class MarketingClueService {
 			return 0L;
 		}
 		
-		WxCustContact customer = qyWeixinService.getWxCustomerInfo(clue.getExtUserId());
+		String token = qyWeixinService.getAccessToken(optional.get().getAppId());
+		WxCustContact customer = qyWeixinService.getWxCustomerInfo(token, clue.getExtUserId());
 		if (null != customer) {
 			// 将[微信昵称]或[企微别名]当线索名称
 			clue.setExtUserName(customer.getName());
+		} else {
+			// 线索表[ExtUserName]要求必填，默认设置：-
+			clue.setExtUserName("-");
 		}
 		marketingClueDao.save(clue);
 //		logger.info("--->营销线索保存完毕！");
