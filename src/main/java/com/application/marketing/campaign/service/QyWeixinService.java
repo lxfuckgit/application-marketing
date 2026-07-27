@@ -213,11 +213,6 @@ public class QyWeixinService {
 		}
 	}
 	
-	public WxCustContact getWxCustomerInfo(String customerId) {
-		String token = getAccessToken("ww5b77b727717ccd72");
-		return getWxCustomerInfo(token, customerId);
-	}
-	
 	public WxCustContact getWxCustomerInfo(String token, String customerId) {
 		String result = customerClient.getCustomer(token, customerId);
 		JsonNode json = UtilJson.json2Object(result);

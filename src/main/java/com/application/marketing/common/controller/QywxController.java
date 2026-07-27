@@ -82,8 +82,8 @@ public class QywxController {
 	 * @param dto
 	 * @return
 	 */
-	@RequestMapping("/getUserIdByMobile")
-	public RstResult<String> getUserByMobile(@RequestBody Map<String, String> dto) {
+	@RequestMapping(value = { "/getUserByMobile", "/getUserIdByMobile" })
+	public RstResult<String> getUserIdByMobile(@RequestBody Map<String, String> dto) {
 		if (StringUtils.isBlank(dto.get("appId"))) {
 			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
 		}
