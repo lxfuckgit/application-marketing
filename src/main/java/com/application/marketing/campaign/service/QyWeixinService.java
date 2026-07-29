@@ -219,7 +219,7 @@ public class QyWeixinService {
 		if (0 == json.get("errcode").intValue()) {
 			return UtilJson.json2Object(json.get("external_contact").toString(), WxCustContact.class);
 		} else {
-			logger.warn("--->接口（getCustomer）通信异常！");
+			logger.warn("--->接口（getCustomer?external_userid={}）调用异常：errcode={} errmsg={}！", customerId, json.get("errcode"), json.get("errmsg"));
 			return null;
 		}
 	}
