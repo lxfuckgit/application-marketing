@@ -2,7 +2,13 @@ package com.application.marketing.controller.dto;
 
 public class CheckClueDTO {
 	private String appId;
-	private String staffId;
+	/**
+	 * 客服绑在企微的电话
+	 */
+	private String staffMobile;
+	/**
+	 * 客人名称/客人昵称
+	 */
 	private String customerName;
 
 	public String getAppId() {
@@ -13,12 +19,12 @@ public class CheckClueDTO {
 		this.appId = appId;
 	}
 
-	public String getStaffId() {
-		return staffId;
+	public String getStaffMobile() {
+		return staffMobile;
 	}
 
-	public void setStaffId(String staffId) {
-		this.staffId = staffId;
+	public void setStaffMobile(String staffMobile) {
+		this.staffMobile = staffMobile;
 	}
 
 	public String getCustomerName() {
