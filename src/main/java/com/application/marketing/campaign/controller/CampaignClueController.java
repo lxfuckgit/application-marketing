@@ -96,6 +96,9 @@ public class CampaignClueController {
 				if (null != customer) {
 					// 将[微信昵称]或[企微别名]当线索名称
 					mc.setExtUserName(customer.getName());
+				} else {
+					// 异常情况下（常见情况：单向好友关系）用默认名称
+					mc.setExtUserName("_NA_");
 				}
 				marketingClueDao.save(mc);
 			}
