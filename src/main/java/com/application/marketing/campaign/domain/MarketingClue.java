@@ -32,12 +32,12 @@ public class MarketingClue extends TopBaseDomain {
 	/**
 	 * 内部用户标识(对接人）
 	 */
-	@Column(name = "user_id", length = 32, nullable = false)
+	@Column(name = "user_id", length = 64, nullable = false)
 	private String userId;
 	/**
 	 * 外部用户标识（线索用户标识）
 	 */
-	@Column(name = "ext_user_id", length = 32)
+	@Column(name = "ext_user_id", length = 64)
 	private String extUserId;
 	/**
 	 * 外部用户名称（线索用户名称）
