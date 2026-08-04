@@ -22,9 +22,16 @@ public class QywxUserService extends QywxService {
 	UserInfoClient userInfoClient = new UserInfoClient();
 	
 	public String getUserIdByMobile(String appId, String mobile) {
-		String result = userInfoClient.getUserIdByMobile(getAccessToken(appId), mobile);
+		String token = getAccessToken(appId);
+		String result = userInfoClient.getUserIdByMobile(token, mobile);
 		JsonNode json = UtilJson.json2Object(result);
 		if (0 == json.get("errcode").intValue()) {
+			// 保存本地数据
+			WxUserInfo wxUser = getWxUserInfo(token, json.get("userid").asText());
+			if (null != wxUser) {
+				persistentQywxUser(appId, wxUser.getUserid(), wxUser.getName(), mobile);
+			}
+			// 返回查询结果
 			return json.get("userid").asText();
 		} else {
 			logger.warn("--->getUserIdByMobile返回错误：{}", json.get("errmsg"));
@@ -105,6 +112,21 @@ public class QywxUserService extends QywxService {
 			logger.warn("--->接口（gettoken）通信异常！");
 			return null;
 		}
+	}
+	
+	private QywxUser persistentQywxUser(String appId, String userId, String userName, String userMobile) {
+		QywxUser entity = qywxUserDao.findByUserId(userId);
+		if (null == entity) {
+			entity = new QywxUser();
+		}
+		entity.setAppId(appId);
+		entity.setDeptId("0");
+		entity.setUserId(userId);
+		entity.setUserName(userName);
+		entity.setNickName(userName);
+		entity.setUserMobile(userMobile);
+		qywxUserDao.save(entity);
+		return entity;
 	}
 
 }

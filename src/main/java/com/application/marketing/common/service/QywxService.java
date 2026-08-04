@@ -36,7 +36,8 @@ public class QywxService {
 		} else if (ta.getExpiresTime() > System.currentTimeMillis()) {
 			return ta.getAccessToken();
 		}
-		/* 查询本地token */
+		/* 获取远程token */
+		logger.warn("--->[{}]正在获取远程token信息！", ta.getAppId());
 		String result = qiyeWeixinClient.getAccessToken(ta.getAppId(), ta.getAppSecret());
 		if (StringUtils.isBlank(result)) {
 			logger.warn("--->接口（gettoken）通信异常！");

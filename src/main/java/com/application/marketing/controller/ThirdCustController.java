@@ -1,7 +1,6 @@
 package com.application.marketing.controller;
 
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.application.marketing.common.domain.QywxUser;
+import com.application.marketing.common.repository.QywxUserDao;
 import com.application.marketing.common.service.QywxUserService;
 import com.application.marketing.controller.dto.CheckClueDTO;
 import com.javapai.framework.action.ResultBuilder;
@@ -27,6 +28,9 @@ import com.javapai.framework.enums.ErrorCode;
 @RequestMapping("/third")
 public class ThirdCustController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired
+	QywxUserDao qywxUserDao;
 	
 	@Autowired
 	QywxUserService qywxUserService;
@@ -56,10 +60,19 @@ public class ThirdCustController {
 		}
 		
 		/* 通过电话转换userId */
-		String wxUserId = qywxUserService.getUserIdByMobile(dto.getAppId(), dto.getStaffMobile());
-		if (Objects.isNull(wxUserId)) {
-			logger.warn("--->当前电话({}/{})无关联用户！", dto.getAppId(), dto.getStaffMobile());
-			return ResultBuilder.normalResult();
+		String wxUserId = null;
+		/* 优先本地查询 */
+		QywxUser user = qywxUserDao.findByAppIdAndUserMobile(dto.getAppId(), dto.getStaffMobile());
+		if (null != user) {
+			wxUserId = user.getUserId();
+		} else {
+			logger.warn("--->暂无匹配数据:({}  {})", dto.getAppId(), dto.getStaffMobile());
+			/* 其次远程查询(调用频繁） */
+//			wxUserId = qywxUserService.getUserIdByMobile(dto.getAppId(), dto.getStaffMobile());
+//			if (java.util.Objects.isNull(wxUserId)) {
+//				logger.warn("--->当前电话({}/{})无关联用户！", dto.getAppId(), dto.getStaffMobile());
+//				return ResultBuilder.normalResult();
+//			}
 		}
 		
 		StringBuffer sb = new StringBuffer();

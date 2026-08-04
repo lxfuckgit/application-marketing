@@ -7,4 +7,5 @@ import com.application.marketing.common.domain.QywxUser;
 public interface QywxUserDao extends PagingAndSortingRepository<QywxUser, Long> {
 	QywxUser findByUserId(String userId);
 
+	QywxUser findByAppIdAndUserMobile(String appId, String userMobile);
 }

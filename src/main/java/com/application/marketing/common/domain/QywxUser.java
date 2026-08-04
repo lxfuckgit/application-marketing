@@ -41,6 +41,11 @@ public class QywxUser {
 	 */
 	@Column(name = "nick_name", length = 60, nullable = false)
 	private String nickName;
+	/**
+	 * 企微成员手机号
+	 */
+	@Column(name = "user_mobile", length = 12)
+	private String userMobile;
 
 	public Long getId() {
 		return id;
@@ -65,7 +70,7 @@ public class QywxUser {
 	public void setDeptId(String deptId) {
 		this.deptId = deptId;
 	}
-	
+
 	public String getUserId() {
 		return userId;
 	}
@@ -88,6 +93,14 @@ public class QywxUser {
 
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
+	}
+
+	public String getUserMobile() {
+		return userMobile;
+	}
+
+	public void setUserMobile(String userMobile) {
+		this.userMobile = userMobile;
 	}
 
 }
