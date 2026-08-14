@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.application.marketing.common.controller.dto.ListQywxDeptDTO;
+import com.application.marketing.common.controller.dto.ListQywxFundFlowDTO;
 import com.application.marketing.common.controller.dto.ListQywxTagDTO;
 import com.application.marketing.common.controller.dto.ListQywxUserDTO;
 import com.application.marketing.common.controller.dto.WeixinGroupCreate;
 import com.application.marketing.common.controller.dto.WeixinGroupMessage;
+import com.application.marketing.common.domain.QywxFundFlow;
 import com.application.marketing.common.domain.QywxUser;
+import com.application.marketing.common.repository.QywxFundFlowDao;
 import com.application.marketing.common.repository.QywxUserV2Dao;
 import com.application.marketing.common.service.QywxAcquisitionService;
 import com.application.marketing.common.service.QywxCropTagService;
@@ -45,6 +48,9 @@ public class QywxController {
 	
 	@Autowired
 	QywxUserV2Dao qywxUserV2Dao;
+	
+	@Autowired
+	QywxFundFlowDao qywxFundFlowDao;
 	
 	@Autowired
 	QywxAcquisitionService qywxAcquisitionService;
@@ -77,12 +83,30 @@ public class QywxController {
 	}
 	
 	/**
+	 * 数据查询（企业微信-企业支付-对外收款-资金流水）。 <br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/pageQywxFundFlow")
+	public PageResult<QywxFundFlow> pageQywxFundFlow(@RequestBody ListQywxFundFlowDTO dto) {
+		return qywxFundFlowDao.listFundFlow(dto);
+	}
+	
+	@Deprecated
+	@RequestMapping(value = "/getUserByMobile")
+	public RstResult<String> getUserByMobile(@RequestBody Map<String, String> dto) {
+		dto.put("appId", "ww5b77b727717ccd72");
+		return getUserIdByMobile(dto);
+	}
+	
+	/**
 	 * 数据查询（通过电话号码-换取企业微信端的内部用户标识）。
 	 * 
 	 * @param dto
 	 * @return
 	 */
-	@RequestMapping(value = { "/getUserByMobile", "/getUserIdByMobile" })
+	@RequestMapping(value = "/getUserIdByMobile")
 	public RstResult<String> getUserIdByMobile(@RequestBody Map<String, String> dto) {
 		if (StringUtils.isBlank(dto.get("appId"))) {
 			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);

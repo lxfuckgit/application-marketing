@@ -1,5 +1,6 @@
 package com.application.marketing.common.controller;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,7 @@ import com.application.marketing.common.controller.dto.ListQywxUserDTO;
 import com.application.marketing.common.controller.dto.SyncQywxUserDTO;
 import com.application.marketing.common.service.QywxAcquisitionService;
 import com.application.marketing.common.service.QywxDeptService;
+import com.application.marketing.common.service.QywxPaymentService;
 import com.application.marketing.common.service.QywxUserService;
 import com.javapai.framework.action.ResultBuilder;
 import com.javapai.framework.action.RstResult;
@@ -28,6 +30,9 @@ public class QywxSyncController {
 	
 	@Autowired
 	QywxAcquisitionService qywxAcquisitionService;
+	
+	@Autowired
+	QywxPaymentService qywxPaymentService;
 	
 	@RequestMapping("/syncQywxDepartyment")
 	public RstResult<String> syncQywxDepartyment(@RequestBody ListQywxDeptDTO dto) {
@@ -82,6 +87,57 @@ public class QywxSyncController {
 		} else {
 			qywxAcquisitionService.getChatInfo(dto.get("appId"), dto.get("chatKey"));
 		}
+		return ResultBuilder.normalResult();
+	}
+	
+	/**
+	 * 数据同步。<br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/syncQywxFundFlow")
+	public RstResult<String> syncQywxFundFlow(@RequestBody Map<String, String> dto) {
+		if (StringUtils.isBlank(dto.get("appId"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		}
+		if (StringUtils.isBlank(dto.get("billDate"))) {
+			// 默认取T-1日账单
+			dto.put("billDate", LocalDate.now().minusDays(1).toString());
+		}
+		qywxPaymentService.getFundFlow(dto.get("appId"), dto.get("billDate"));
+		return ResultBuilder.normalResult();
+	}
+	
+	/**
+	 * 数据同步。<br>
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/syncQywxFundFlowHistory")
+	public RstResult<String> syncQywxFundFlowHistory(@RequestBody Map<String, String> dto) {
+		if (StringUtils.isBlank(dto.get("appId"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_APPID);
+		}
+		if (StringUtils.isBlank(dto.get("days"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
+		}
+		if (StringUtils.isBlank(dto.get("billDateFrom"))) {
+			return ResultBuilder.buildResult(ErrorCode.PARAMS_EMPTY);
+		}
+		
+		Integer days = Integer.valueOf(dto.get("days"));
+		LocalDate dateFrom = LocalDate.parse(dto.get("billDateFrom"));
+		for (int i = 0; i < days; i++) {
+			qywxPaymentService.getFundFlow(dto.get("appId"), dateFrom.plusDays(i).toString());
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		return ResultBuilder.normalResult();
 	}
 }
